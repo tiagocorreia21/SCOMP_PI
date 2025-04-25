@@ -3,6 +3,8 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include <structs.h>
+#include <functions.h>
 
 #define DRONE_NUM 50
 
