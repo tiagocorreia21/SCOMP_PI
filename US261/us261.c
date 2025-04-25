@@ -7,8 +7,14 @@
 #include <functions.h>
 
 #define DRONE_NUM 50
+#define TIME_STEPS_NUM 200
+#define MAX_COLLISION_NUM 5
 
 int main() {
+
+	Position positions[TIME_STEPS_NUM][DRONE_NUM];
+
+	DroneInfo drones[DRONE_NUM];
 	
 	int fd[2];
 
