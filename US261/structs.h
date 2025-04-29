@@ -12,6 +12,6 @@ typedef struct {
     int fd[2];
     int pid;
     int active;
-}
+} DroneInfo;
 
 #endif

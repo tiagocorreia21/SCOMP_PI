@@ -3,18 +3,17 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include <structs.h>
-#include <functions.h>
+#include "structs.h"
+#include "functions.h"
 
 #define POSSIBLE_NODES 10
 #define TIME_STEPS_NUM 200
 #define MAX_COLLISION_NUM 5
 
-typedef struct{
-	int positionDrone;
-	int timeStamp;
-}Position;
-
+//typedef struct{
+//	int positionDrone;
+//	int timeStamp;
+//}Position;
 
 int main() {
 	
@@ -25,12 +24,10 @@ int main() {
 	
 	//Array bidimensional para posições dos drones
 	Position positions[TIME_STEPS_NUM][numeroDrones];
-	
-	
+
 	int fd[numeroDrones][2];
 	int p[numeroDrones];
-	
-	
+
 	//Criação de um pipe para cada filho
 	for(int i = 0; i < numeroDrones; i++){
 		if (pipe(fd[i]) == -1) {
@@ -38,8 +35,7 @@ int main() {
 			exit(1);
 		}
 	}
-	
-	
+
 	//Cria os filhos(drones)
 	for (int i = 0; i < numeroDrones; i++) {
 
@@ -66,8 +62,6 @@ int main() {
             
             close(fd[i][1]);
             exit(0);
-			
-			
 		}
 	}
 	
@@ -78,7 +72,6 @@ int main() {
         close(fd[i][1]);
     }
 
-	
 	for (int i = 0; i < TIME_STEPS_NUM; i++){
 		for(int j = 0; j < numeroDrones; j++){
 			

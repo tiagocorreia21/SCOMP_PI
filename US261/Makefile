@@ -1,20 +1,23 @@
-main: main.o
-	gcc main.o -z noexecstack -o main
+us261: us261.o functions.o
+	gcc us261.o functions.o -z noexecstack -o main
 
-main.o: main.c
-	gcc -g -Wall -Wextra -fanalyzer -c main.c -o main.o
+us261.o: us261.c functions.h structs.h
+	gcc -g -Wall -Wextra -fanalyzer -c us261.c -o us261.o
 
-run: main
+functions.o: functions.c functions.h structs.h
+	gcc -g -Wall -Wextra -fanalyzer -c functions.c -o functions.o
+
+run: us261
 	./main
 
 clean:
-	rm *.o main
+	rm -f *.o main
 
-vg: main
+vg: us261
 	valgrind ./main
 
-debug: main
+debug: us261
 	gdb -tui main
 
-ddd: main
+ddd: us261
 	ddd main &
