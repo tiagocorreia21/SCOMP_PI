@@ -9,6 +9,7 @@
 #define POSSIBLE_NODES 10
 #define TIME_STEPS_NUM 200
 #define MAX_COLLISION_NUM 5
+#define DRONE_NUM 20
 
 //typedef struct{
 //	int positionDrone;
@@ -17,19 +18,14 @@
 
 int main() {
 	
-	int numeroDrones;
-	
-	printf("Digite o número de drones para a simulação: ");
-	scanf("%d", &numeroDrones);
-	
 	//Array bidimensional para posições dos drones
-	Position positions[TIME_STEPS_NUM][numeroDrones];
+	Position positions[TIME_STEPS_NUM][DRONE_NUM];
 
-	int fd[numeroDrones][2];
-	int p[numeroDrones];
+	int fd[DRONE_NUM][2];
+	int p[DRONE_NUM];
 
 	//Criação de um pipe para cada filho
-	for(int i = 0; i < numeroDrones; i++){
+	for(int i = 0; i < DRONE_NUM; i++){
 		if (pipe(fd[i]) == -1) {
 			perror("Pipe Failed");
 			exit(1);
@@ -37,7 +33,7 @@ int main() {
 	}
 
 	//Cria os filhos(drones)
-	for (int i = 0; i < numeroDrones; i++) {
+	for (int i = 0; i < DRONE_NUM; i++) {
 
 		p[i] = fork();
 
@@ -68,12 +64,12 @@ int main() {
 	//Processo pai
 	
 	//Fechar lados de escrita
-    for (int i = 0; i < numeroDrones; i++) {
+    for (int i = 0; i < DRONE_NUM; i++) {
         close(fd[i][1]);
     }
 
 	for (int i = 0; i < TIME_STEPS_NUM; i++){
-		for(int j = 0; j < numeroDrones; j++){
+		for(int j = 0; j < DRONE_NUM; j++){
 			
 			Position pos;
 			//Processo pai
@@ -85,7 +81,7 @@ int main() {
 		}
 	}
 	//Fechar os lados da leitura
-	for (int j = 0; j < numeroDrones; j++) {
+	for (int j = 0; j < DRONE_NUM; j++) {
 		close(fd[j][0]);
 	}
 	
