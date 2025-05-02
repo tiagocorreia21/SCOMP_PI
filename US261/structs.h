@@ -5,6 +5,7 @@ typedef struct {
     int x;
     int y;
     int z;
+    int time_stamp;
 } Position;
 
 typedef struct {
