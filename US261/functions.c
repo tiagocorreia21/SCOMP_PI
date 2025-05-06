@@ -37,7 +37,7 @@ void initialize_drone_positions(Position *positions, int time_step_num, int dron
 
 		for (int j = 0; j < drone_num; j++) {
 
-			positions[i * drone_num + j].x = -1; // -1 indica posição indefinida
+			positions[i * drone_num + j].x = -1; // -1 indicates undefined position
             positions[i * drone_num + j].y = -1;
             positions[i * drone_num + j].z = -1;
 		}
