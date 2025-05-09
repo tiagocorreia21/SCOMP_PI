@@ -1,5 +1,6 @@
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 
 void handle_collition_sigurs1(int signo) {
 
@@ -12,7 +13,7 @@ void verify_collitions() {
 
     memset(&act, 0, sizeof(struct sigaction));
 
-    act.sa_handler = handle_collition_sigurs1
+    act.sa_handler = handle_collition_sigurs1;
 
     // restard interrupted system calls
     act.sa_flags = SA_RESTART;
