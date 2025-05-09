@@ -22,8 +22,8 @@ int main() {
 	printf("Initializing drone positions\n\n");
 	initialize_drone_positions((Position *)positions, DRONE_NUM, TIME_STEPS_NUM);
 
-	int fd[DRONE_NUM][2];
-	int p[DRONE_NUM];
+	int fd[DRONE_NUM][2]; //Pipes
+	int p[DRONE_NUM]; //PIDs
 
 	// create a pipe for each child
 	printf("Setup of pipes in progress...\n\n");
@@ -44,7 +44,6 @@ int main() {
 		}
 
 		if (p[i] == 0) {
-
 			// child/drone process
 			close(fd[i][0]); // close read
 
@@ -64,6 +63,15 @@ int main() {
 	
 	//Parent Process
 
+	// Fechar escrita no pai (só vai ler)
+    for (int i = 0; i < DRONE_NUM; i++) {
+        close(fd[i][1]);
+    }
+
+    //us264
+    run_simulation(p, fd, (Position *)positions, DRONE_NUM, TIME_STEPS_NUM, shared_data);
+
+
 	// wait for all the child process to finish
 	printf("Waiting for drone processes to finish...\n\n");
 	for (int i = 0; i < DRONE_NUM; i++) {
@@ -78,39 +86,10 @@ int main() {
 	}
 	printf("============================================\n\n");
 	
-	//close write
-    for (int i = 0; i < DRONE_NUM; i++) {
-        close(fd[i][1]);
-    }
-
-	for (int i = 0; i < DRONE_NUM; i++) {
-
-		for (int j = 0; j < TIME_STEPS_NUM; j++) {
-			
-			Position pos;
-
-			int n = read(fd[i][0], &pos, sizeof(Position));
-
-			if (n == -1) {
-				perror("Read Failed");
-				exit(1);
-			}
-
-			// TODO: Add logic for collitions
-			// verify_collisions();
-
-			positions[i][j] = pos;
-
-			printf("Drone %d position: (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
-		}
-		printf("\n");
-	}
-	printf("\n");
-
 	//close read
-	for (int j = 0; j < DRONE_NUM; j++) {
-		close(fd[j][0]);
-	}
+    for (int i = 0; i < DRONE_NUM; i++) {
+        close(fd[i][0]);
+    }
 
 	printf("Simulation finished with success...\n");
 	return 0;

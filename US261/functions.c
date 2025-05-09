@@ -4,18 +4,32 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <signal.h>
 
 #define SPACE_X 1000
 #define SPACE_Y 1000
 #define SPACE_Z 1000
 
-void run_drone_script(int write_fd, int time_step_num) {
-    // drone script - simulate drone movements
+//sig_atomic_t para sinais nao interromperem fluxo normal do programa
+volatile sig_atomic_t ready_to_move = 0;
 
-    // TODO - implement the actual movements of the drones
+void handler(int sig) {
+    ready_to_move = 1;
+}
+
+void run_drone_script(int write_fd, int time_step_num) {
+
+    signal(SIGCONT, handler);
 
     // Example script with random movements
     for (int i = 0; i < time_step_num; i++) {
+
+        // Espera por sinal do processo pai
+        while (!ready_to_move) {
+            pause();
+        }
+        ready_to_move = 0; // reset
+
 
     	Position position;
 
