@@ -15,4 +15,8 @@ typedef struct {
     int active;
 } DroneInfo;
 
+typedef struct {
+    int collition_num;
+} shared_data_type;
+
 #endif

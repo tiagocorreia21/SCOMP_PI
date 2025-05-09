@@ -14,11 +14,13 @@
 
 int main() {
 
+    shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
+
 	//Array to store drone positions
 	Position positions[DRONE_NUM][TIME_STEPS_NUM];
 
 	printf("Initializing drone positions\n\n");
-	initialize_drone_positions(positions, DRONE_NUM, TIME_STEPS_NUM);
+	initialize_drone_positions((Position *)positions, DRONE_NUM, TIME_STEPS_NUM);
 
 	int fd[DRONE_NUM][2];
 	int p[DRONE_NUM];
@@ -95,6 +97,7 @@ int main() {
 			}
 
 			// TODO: Add logic for collitions
+			// verify_collisions();
 
 			positions[i][j] = pos;
 
