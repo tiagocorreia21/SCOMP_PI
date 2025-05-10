@@ -16,6 +16,10 @@ typedef struct {
 } DroneInfo;
 
 typedef struct {
+    Position drone_positions[10];
+} TimeStep;
+
+typedef struct {
     int collition_num;
 } shared_data_type;
 
