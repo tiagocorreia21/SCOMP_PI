@@ -47,19 +47,6 @@ void run_drone_script(int write_fd, int time_step_num) {
     }
 }
 
-void initialize_drone_positions(Position *positions, int time_step_num, int drone_num) {
-
-	for (int i = 0; i < time_step_num; i++) {
-
-		for (int j = 0; j < drone_num; j++) {
-
-			positions[i * drone_num + j].x = -1; // -1 indicates undefined position
-            positions[i * drone_num + j].y = -1;
-            positions[i * drone_num + j].z = -1;
-		}
-	}
-}
-
 shared_data_type *allocate_shared_memory(char *shm_name) {
 
     int data_size = sizeof(shared_data_type);

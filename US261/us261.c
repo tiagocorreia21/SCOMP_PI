@@ -16,14 +16,11 @@ int main() {
 
     shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
 
-	//Array to store drone positions
-	Position positions[DRONE_NUM][TIME_STEPS_NUM];
-
-	printf("Initializing drone positions\n\n");
-	initialize_drone_positions((Position *)positions, DRONE_NUM, TIME_STEPS_NUM);
-
 	// Allocate the 3D matrix for drone positions dynamically
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
+
+	printf("Initializing drone positions\n\n");
+	initialize_drone_positions(**positions_matrix, TIME_STEPS_NUM, DRONE_NUM);
 
 	if (positions_matrix == NULL) {
         // Error message already printed in allocate_position_matrix
@@ -62,10 +59,6 @@ int main() {
 
             close(fd[i][1]);  // close write
             exit(0);
-
-		} else {
-			// store the child pids
-			// p[i] = p;
 		}
 	}
 
@@ -80,7 +73,6 @@ int main() {
 
     //us264
     run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM, shared_data);
-
 
 	// wait for all the child process to finish
 	printf("Waiting for drone processes to finish...\n\n");
