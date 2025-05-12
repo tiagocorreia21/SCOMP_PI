@@ -6,9 +6,9 @@
 #include "functions.h"
 
 
-void run_simulation(int pids[], int fd[][2], Position *positions_ptr, int drone_count, int time_steps, shared_data_type *shared_data) {
+void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps, shared_data_type *shared_data) {
     //cast do ponteiro para matriz positions[drone_count][time_steps]
-    Position (*positions)[time_steps] = (Position (*)[time_steps])positions_ptr;
+    Position ***drone_positions_matrix = positions_ptr;
 
     for (int t = 0; t < time_steps; t++) {
         printf("\n===== TIME STEP %d =====\n", t);
@@ -27,7 +27,7 @@ void run_simulation(int pids[], int fd[][2], Position *positions_ptr, int drone_
             
             // If not the first time step, validate the movement
             if (t > 0) {
-                Position current_pos = get_position(positions_ptr, i, t-1);
+                Position current_pos = get_position_3d(drone_positions_matrix, i, t-1, drone_count, time_steps);
                 if (!process_movement(&current_pos, &pos)) {
                     printf("Warning: Invalid movement detected for drone %d\n", i);
                     // Use the last valid position
@@ -36,12 +36,12 @@ void run_simulation(int pids[], int fd[][2], Position *positions_ptr, int drone_
             }
             
             // Store the position
-            store_position(positions_ptr, i, t, pos);
+            store_position(drone_positions_matrix, i, t, pos);
             printf("Drone %d @ (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
         }
 
         // Print current positions for all drones
-        print_positions(positions_ptr, drone_count, t);
+        print_positions(drone_positions_matrix, drone_count, t);
 
         // US263 – detetar colisões
         //detect_collisions(positions, t, drone_count, pids, shared_data);

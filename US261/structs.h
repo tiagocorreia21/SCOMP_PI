@@ -2,9 +2,9 @@
 #define STRUCTS_H
 
 typedef struct {
-    int x;
-    int y;
-    int z;
+    double x;
+    double y;
+    double z;
     int time_step;
 } Position;
 
@@ -14,10 +14,6 @@ typedef struct {
     int pid;
     int active;
 } DroneInfo;
-
-typedef struct {
-    Position drone_positions[10];
-} TimeStep;
 
 typedef struct {
     int collition_num;
