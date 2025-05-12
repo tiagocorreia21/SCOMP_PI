@@ -3,7 +3,7 @@
 
 #include "structs.h"
 
-// Funções US262
+// US262 functions
 void capture_drone_movement(int fd, Position *pos);
 int process_movement(Position *current_pos, Position *new_pos);
 void store_position(Position *positions_ptr, int drone_id, int time_step, Position pos);
