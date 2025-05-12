@@ -12,6 +12,10 @@
 #define MAX_COLLISION_NUM 5
 #define DRONE_NUM 10
 
+void handle_collition_sigurs1(int signo) {
+    write(STDOUT_FILENO, "\nCollition Detected\n", 20);
+}
+
 int main() {
 
     shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
@@ -56,6 +60,20 @@ int main() {
 
             // simulate writing by child/drone
             run_drone_script(fd[i][1], TIME_STEPS_NUM);
+
+            struct sigaction act;
+
+            memset(&act, 0, sizeof(struct sigaction));
+
+            act.sa_handler = handle_collition_sigurs1;
+
+            // restard interrupted system calls
+            act.sa_flags = SA_RESTART;
+
+            // block all other signals
+            sigfillset(&act.sa_mask);
+
+            sigaction(SIGUSR1, &act, NULL);
 
             close(fd[i][1]);  // close write
             exit(0);

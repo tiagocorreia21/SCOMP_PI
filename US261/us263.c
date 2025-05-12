@@ -2,26 +2,24 @@
 #include <string.h>
 #include <unistd.h>
 
-void handle_collition_sigurs1(int signo) {
+void verify_collitions(Position *position_matrix, int num_drones, int time_steps, shared_data_type *shared_data) {
 
-    write(STDOUT_FILENO, "\nCollition Detected\n", 20);
-}
+    for (int t = 0; i < time_steps; i++) {
 
-void verify_collitions() {
+        for (int i = 0; i < num_drones; i++) {
 
-    struct sigaction act;
+            for (int j = 0; j < num_drones; j++) {
 
-    memset(&act, 0, sizeof(struct sigaction));
+                if (position_matrix[t][i]->x == position_matrix[t][j]->x &&
+                    position_matrix[t][i]->x == position_matrix[t][j]->x &&
+                    position_matrix[t][i]->x == position_matrix[t][j]->x) {
 
-    act.sa_handler = handle_collition_sigurs1;
+                    shared_data->colltion_num++;
 
-    // restard interrupted system calls
-    act.sa_flags = SA_RESTART;
-
-    // block all other signals
-    sigfillset(&act.sa_mask);
-
-    sigaction(SIGUSR1, &act, NULL);
-
-    // TODO: Implement the collition verification
+                    kill(position_matrix[t][i]->pid, SIGUSR1);
+                    kill(position_matrix[t][j]->pid, SIGUSR1);
+                }
+            }
+        }
+    }
 }
