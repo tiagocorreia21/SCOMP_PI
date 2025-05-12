@@ -22,6 +22,16 @@ int main() {
 	printf("Initializing drone positions\n\n");
 	initialize_drone_positions((Position *)positions, DRONE_NUM, TIME_STEPS_NUM);
 
+	// Allocate the 3D matrix for drone positions dynamically
+	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
+
+	if (positions_matrix == NULL) {
+        // Error message already printed in allocate_position_matrix
+        // Need to clean up shared memory here if it was allocated successfully
+        // free_shared_memory(shared_data, "/shm_collitions");
+        return EXIT_FAILURE;
+    }
+
 	int fd[DRONE_NUM][2]; //Pipes
 	int p[DRONE_NUM]; //PIDs
 
@@ -69,7 +79,7 @@ int main() {
     }
 
     //us264
-    run_simulation(p, fd, (Position *)positions, DRONE_NUM, TIME_STEPS_NUM, shared_data);
+    run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM, shared_data);
 
 
 	// wait for all the child process to finish

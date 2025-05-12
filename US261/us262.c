@@ -48,29 +48,18 @@ int process_movement(Position *current_pos, Position *new_pos) {
  * @param time_step The current time step
  * @param pos The position to store
  */
-void store_position(Position *positions_ptr, int drone_id, int time_step, Position pos) {
-    // Cast the pointer to a 3D matrix
-    Position (*positions)[time_step] = (Position (*)[time_step])positions_ptr;
-    
-    // Store the position in the matrix
-    positions[drone_id][time_step] = pos;
-    
-    // Update the time_step field in the position struct
-    positions[drone_id][time_step].time_step = time_step;
-}
+void store_position(Position ***positions_ptr, int drone_id, int time_step, Position pos) {
 
-/**
- * Retrieves a drone's position from the 3D position matrix
- * @param positions Pointer to the 3D position matrix
- * @param drone_id The ID of the drone
- * @param time_step The time step to retrieve
- * @return The position at the specified coordinates
- */
-Position get_position(Position *positions_ptr, int drone_id, int time_step) {
-    // Cast the pointer to a 3D matrix
-    Position (*positions)[time_step] = (Position (*)[time_step])positions_ptr;
-    
-    return positions[drone_id][time_step];
+    // Ensure the matrix and the target location are allocated
+    if (positions_ptr == NULL || positions_ptr[time_step] == NULL || positions_ptr[time_step][drone_id] == NULL) {
+         fprintf(stderr, "Error: Matrix or specific position not allocated.\n");
+        return;
+    }
+
+    // Store the position by dereferencing the pointer at the correct location
+    *positions_ptr[time_step][drone_id] = pos;
+
+    positions_ptr[time_step][drone_id]->time_step = time_step;
 }
 
 /**
