@@ -8,9 +8,9 @@ void capture_drone_movement(int fd, Position *pos);
 
 int process_movement(Position *current_pos, Position *new_pos);
 
-void store_position(Position *positions_ptr, int drone_id, int time_step, Position pos);
+void store_position(Position ***positions_ptr, int drone_id, int time_step, Position pos);
 
-void print_positions(Position *positions_ptr, int drone_count, int time_step);
+void print_positions(Position ***positions_ptr, int drone_count, int time_step);
 
 void run_drone_script(int write_fd, int drone_num);
 

@@ -249,14 +249,11 @@ void store_position(Position ***positions_ptr, int drone_id, int time_step, Posi
  * @param drone_count Number of drones
  * @param time_step Current time step
  */
-void print_positions(Position *positions_ptr, int drone_count, int time_step) {
-    // Cast the pointer to a 3D matrix
-    Position (*positions)[time_step] = (Position (*)[time_step])positions_ptr;
-    
-    printf("\nCurrent positions at time step %d:\n", time_step);
+void print_positions(Position ***positions_ptr, int drone_count, int time_step) {
+    printf("\n===== TIME STEP %d =====\n", time_step);
     for (int i = 0; i < drone_count; i++) {
-        Position pos = positions[i][time_step];
-        printf("Drone %d: (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
+        Position pos = *positions_ptr[time_step][i];
+        printf("Drone %d @ (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
     }
 }
 

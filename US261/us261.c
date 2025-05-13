@@ -28,6 +28,8 @@ void handle_sigint(int signo) {
 }
 
 int main() {
+	srand(time(NULL));
+
 	shm_unlink("/shm_collitions");
 	struct sigaction act;
 
