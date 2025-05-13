@@ -2,9 +2,9 @@
 #define STRUCTS_H
 
 typedef struct {
-    double x;
-    double y;
-    double z;
+    int x;
+    int y;
+    int z;
     int time_step;
 } Position;
 

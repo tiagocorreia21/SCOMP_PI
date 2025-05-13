@@ -151,16 +151,25 @@ void free_position_matrix(Position*** matrix, int num_drones, int time_steps) {
 }
 
 Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
-     // Basic boundary checks
+
+    // Basic boundary checks
     if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {
+
          fprintf(stderr, "Error: Attempted to get position out of matrix bounds (drone %d, time %d).\n", drone_id, time_step);
-         // Return a default or invalid position
-         return (Position){-1, -1, -1}; // Example with -1 for invalid coordinates
+
+         Position invalid_position;
+         invalid_position.x = -1;
+         invalid_position.y = -1;
+         invalid_position.z = -1;
+
+         return invalid_position;
     }
 
     // Ensure the memory is allocated at this location
     if (matrix == NULL || matrix[time_step] == NULL || matrix[time_step][drone_id] == NULL) {
+
          fprintf(stderr, "Error: Matrix or specific position not allocated at (drone %d, time %d).\n", drone_id, time_step);
+
          // Return a default or invalid position
          return (Position){-1, -1, -1}; // Example with -1 for invalid coordinates
     }

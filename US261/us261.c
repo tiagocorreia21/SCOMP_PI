@@ -12,15 +12,13 @@
 #define MAX_COLLISION_NUM 5
 #define DRONE_NUM 10
 
-void handle_collition_sigurs1(int signo) {
+void handle_collition_sigurs1() {
     write(STDOUT_FILENO, "\nCollition Detected\n", 20);
-    printf("(%d)", signo);
 }
 
 void handle_sigint(int signo) {
 
 	write(STDOUT_FILENO, "\nSimulation terminated: collition threshold exceeded\n", 53);
-	printf("(%d)", signo);
 
 	//deallocate_shared_memory("shm_collitions", shared_data);
 

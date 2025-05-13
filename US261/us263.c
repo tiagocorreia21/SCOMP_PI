@@ -2,8 +2,11 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include "structs.h"
+#include <stdlib.h>
+#include "functions.h"
 
-void verify_collitions(Position *position_matrix, int num_drones, int time_steps, shared_data_type *shared_data, int max_collition_num) {
+void verify_collitions(Position ***position_matrix, int num_drones, int time_steps, shared_data_type *shared_data, int max_collition_num) {
 
     for (int t = 0; t < time_steps; t++) {
 
@@ -11,15 +14,16 @@ void verify_collitions(Position *position_matrix, int num_drones, int time_steps
 
             for (int j = 0; j < num_drones; j++) {
 
-                if (position_matrix[t][i]->x == position_matrix[t][j]->x &&
-                    position_matrix[t][i]->x == position_matrix[t][j]->x &&
-                    position_matrix[t][i]->x == position_matrix[t][j]->x) {
+            	Position pos_i = get_position_3d(position_matrix, i, t, num_drones, time_steps);
+            	Position pos_j = get_position_3d(position_matrix, j, t, num_drones, time_steps);
 
-                    shared_data->colltion_num++;
+				if (pos_i.x == pos_j.x || pos_i.y == pos_j.y || pos_i.z == pos_j.z) {
 
-                    if (shared_data->collition_num == max_collition_num) {
+					shared_data->collition_num++;
+
+		    		if (shared_data->collition_num == max_collition_num) {
                     	raise(SIGINT);
-                    }
+            		}
 
                     FILE *file = fopen("collitions_logs.txt", "w");
 
@@ -32,10 +36,10 @@ void verify_collitions(Position *position_matrix, int num_drones, int time_steps
 
                     fclose(file);
 
-                    kill(position_matrix[t][i]->pid, SIGUSR1);
-                    kill(position_matrix[t][j]->pid, SIGUSR1);
+                    //kill(pos_i.pid, SIGUSR1);
+                    //kill(pos_j.pid, SIGUSR1);
                 }
-            }
+			}
         }
     }
 }
