@@ -77,6 +77,13 @@ shared_data_type *allocate_shared_memory(char *shm_name) {
     return shared_data;
 }
 
+void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data) {
+	int data_size = sizeof(shared_data_type);
+	munmap(shared_data, data_size);
+	//close(fd);
+	shm_unlink(shm_name);
+}
+
 // Função para alocar a matriz 3D de posições
 Position*** allocate_position_matrix(int num_drones, int time_steps) {
     Position*** matrix = (Position***)malloc(time_steps * sizeof(Position**));

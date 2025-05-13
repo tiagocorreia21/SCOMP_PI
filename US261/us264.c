@@ -6,7 +6,7 @@
 #include "functions.h"
 
 
-void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps, shared_data_type *shared_data) {
+void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps, shared_data_type *shared_data, int max_collition_num) {
     //cast do ponteiro para matriz positions[drone_count][time_steps]
     Position ***drone_positions_matrix = positions_ptr;
 
@@ -44,7 +44,7 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
         print_positions(drone_positions_matrix, drone_count, t);
 
         // US263 – detetar colisões
-        //detect_collisions(positions, t, drone_count, pids, shared_data);
+        //detect_collisions(positions, t, drone_count, pids, shared_data, max_collition_num);
     }
 
     //Chamar US265

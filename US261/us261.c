@@ -14,9 +14,30 @@
 
 void handle_collition_sigurs1(int signo) {
     write(STDOUT_FILENO, "\nCollition Detected\n", 20);
+    printf("(%d)", signo);
+}
+
+void handle_sigint(int signo) {
+
+	write(STDOUT_FILENO, "\nSimulation terminated: collition threshold exceeded\n", 53);
+	printf("(%d)", signo);
+
+	//deallocate_shared_memory("shm_collitions", shared_data);
+
+	exit(0);
 }
 
 int main() {
+
+	struct sigaction act;
+
+	memset(&act, 0, sizeof(struct sigaction));
+
+	act.sa_handler = handle_sigint;
+	act.sa_flags = SA_RESTART;
+	sigfillset(&act.sa_mask);
+
+	sigaction(SIGINT, &act, NULL);
 
     shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
 
@@ -90,7 +111,7 @@ int main() {
     }
 
     //us264
-    run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM, shared_data);
+    run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM, shared_data, MAX_COLLISION_NUM);
 
 	// wait for all the child process to finish
 	printf("Waiting for drone processes to finish...\n\n");
