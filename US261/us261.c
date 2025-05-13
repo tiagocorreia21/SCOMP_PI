@@ -12,13 +12,15 @@
 #define MAX_COLLISION_NUM 5
 #define DRONE_NUM 10
 
-void handle_collition_sigurs1() {
+void handle_collition_sigurs1(int signo) {
     write(STDOUT_FILENO, "\nCollition Detected\n", 20);
+    printf("(%d)", signo);
 }
 
 void handle_sigint(int signo) {
 
 	write(STDOUT_FILENO, "\nSimulation terminated: collition threshold exceeded\n", 53);
+	printf("(%d)", signo);
 
 	//deallocate_shared_memory("shm_collitions", shared_data);
 
@@ -26,7 +28,7 @@ void handle_sigint(int signo) {
 }
 
 int main() {
-
+	shm_unlink("/shm_collitions");
 	struct sigaction act;
 
 	memset(&act, 0, sizeof(struct sigaction));
@@ -36,14 +38,12 @@ int main() {
 	sigfillset(&act.sa_mask);
 
 	sigaction(SIGINT, &act, NULL);
-
+	
     shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
 
 	// Allocate the 3D matrix for drone positions dynamically
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
 
-	printf("Initializing drone positions\n\n");
-	initialize_drone_positions(**positions_matrix, TIME_STEPS_NUM, DRONE_NUM);
 
 	if (positions_matrix == NULL) {
         // Error message already printed in allocate_position_matrix
@@ -131,5 +131,6 @@ int main() {
     }
 
 	printf("Simulation finished with success...\n");
+	shm_unlink("/shm_collitions");
 	return 0;
 }

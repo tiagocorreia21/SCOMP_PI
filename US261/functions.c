@@ -258,4 +258,17 @@ void print_positions(Position *positions_ptr, int drone_count, int time_step) {
         Position pos = positions[i][time_step];
         printf("Drone %d: (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
     }
+}
+
+void initialize_drone_positions(Position ***positions_matrix, int time_step_num, int drone_num) {
+    // Initialize positions for each drone at each time step
+    for (int t = 0; t < time_step_num; t++) {
+        for (int d = 0; d < drone_num; d++) {
+            // Initialize with random positions between 0 and 100
+            positions_matrix[t][d]->x = rand() % 100;
+            positions_matrix[t][d]->y = rand() % 100;
+            positions_matrix[t][d]->z = rand() % 100;
+            positions_matrix[t][d]->time_step = t;
+        }
+    }
 } 
