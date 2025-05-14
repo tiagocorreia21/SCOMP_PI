@@ -13,7 +13,7 @@
 //sig_atomic_t para sinais nao interromperem fluxo normal do programa
 volatile sig_atomic_t ready_to_move = 0;
 
-void handler(int sig) {
+void handler() {
     ready_to_move = 1;
 }
 
@@ -30,13 +30,22 @@ void run_drone_script(int write_fd, int time_step_num) {
         }
         ready_to_move = 0; // reset
 
+        //int valid_position = 0;
 
-    	Position position;
+        Position position;
 
-    	position.x = rand() % SPACE_X;
-    	position.y = rand() % SPACE_Y;
-    	position.z = rand() % SPACE_Z;
-    	position.time_step = i;
+        while (1) {
+
+    		position.x = rand() % SPACE_X;
+    		position.y = rand() % SPACE_Y;
+    		position.z = rand() % SPACE_Z;
+    		position.time_step = i;
+
+    		//int v = verify_collitions(Position *position_matrix, Position position, time_step_num);
+
+			int v = 0;
+    		if (v == 0) break;
+        }
 
     	int n = write(write_fd, &position, sizeof(position));
 
@@ -86,27 +95,37 @@ void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data) {
 
 // Função para alocar a matriz 3D de posições
 Position*** allocate_position_matrix(int num_drones, int time_steps) {
-    Position*** matrix = (Position***)malloc(time_steps * sizeof(Position**));
+
+    Position*** matrix = (Position***) malloc(time_steps * sizeof(Position**));
+
     if (matrix == NULL) {
         perror("Failed to allocate memory for time steps");
         return NULL;
     }
 
     for (int t = 0; t < time_steps; t++) {
-        matrix[t] = (Position**)malloc(num_drones * sizeof(Position*));
+
+        matrix[t] = (Position **) malloc(num_drones * sizeof(Position*));
+
         if (matrix[t] == NULL) {
 
             perror("Failed to allocate memory for drones at a time step");
 
             // Limpar a memória já alocada
             for (int i = 0; i < t; i++) {
+            	for (int d = 0; d < num_drones; d++) {
+            		free(matrix[i][d]);
+            	}
                 free(matrix[i]);
             }
             free(matrix);
             return NULL;
         }
+
         for (int d = 0; d < num_drones; d++) {
-            matrix[t][d] = (Position*)malloc(sizeof(Position));
+
+            matrix[t][d] = (Position*) malloc(sizeof(Position));
+
             if (matrix[t][d] == NULL) {
 
                 perror("Failed to allocate memory for a position");
@@ -116,6 +135,7 @@ Position*** allocate_position_matrix(int num_drones, int time_steps) {
                     free(matrix[t][j]);
                 }
                 free(matrix[t]);
+
                 for (int i = 0; i < t; i++) {
                     for (int k = 0; k < num_drones; k++) {
                         free(matrix[i][k]);
@@ -171,7 +191,14 @@ Position get_position_3d(Position*** matrix, int drone_id, int time_step, int nu
          fprintf(stderr, "Error: Matrix or specific position not allocated at (drone %d, time %d).\n", drone_id, time_step);
 
          // Return a default or invalid position
-         return (Position){-1, -1, -1}; // Example with -1 for invalid coordinates
+
+         Position invalid_position;
+
+         invalid_position.x = -1;
+         invalid_position.y = -1;
+         invalid_position.z = -1;
+
+         return invalid_position;
     }
 
     // Return the Position struct by dereferencing the pointer at the correct location

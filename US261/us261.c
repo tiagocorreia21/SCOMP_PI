@@ -6,42 +6,25 @@
 #include <sys/wait.h>
 #include "structs.h"
 #include "functions.h"
+#include <time.h>
+#include <sys/mman.h>
+#include "us264.h"
 
 #define POSSIBLE_NODES 10
 #define TIME_STEPS_NUM 5
 #define MAX_COLLISION_NUM 5
 #define DRONE_NUM 10
 
-void handle_collition_sigurs1(int signo) {
+void handle_collition_sigurs1() {
     write(STDOUT_FILENO, "\nCollition Detected\n", 20);
-    printf("(%d)", signo);
-}
-
-void handle_sigint(int signo) {
-
-	write(STDOUT_FILENO, "\nSimulation terminated: collition threshold exceeded\n", 53);
-	printf("(%d)", signo);
-
-	//deallocate_shared_memory("shm_collitions", shared_data);
-
-	exit(0);
 }
 
 int main() {
 	srand(time(NULL));
 
 	shm_unlink("/shm_collitions");
-	struct sigaction act;
-
-	memset(&act, 0, sizeof(struct sigaction));
-
-	act.sa_handler = handle_sigint;
-	act.sa_flags = SA_RESTART;
-	sigfillset(&act.sa_mask);
-
-	sigaction(SIGINT, &act, NULL);
 	
-    shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
+    //shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
 
 	// Allocate the 3D matrix for drone positions dynamically
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
@@ -111,7 +94,7 @@ int main() {
     }
 
     //us264
-    run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM, shared_data, MAX_COLLISION_NUM);
+    run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM);
 
 	// wait for all the child process to finish
 	printf("Waiting for drone processes to finish...\n\n");
