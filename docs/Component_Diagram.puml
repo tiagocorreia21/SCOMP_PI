@@ -1,0 +1,27 @@
+@startuml
+
+package "US261" {
+    [us261.c] --> [functions.c]
+    [us261.c] --> [us263.c]
+    [us261.c] --> [us264.c]
+    [us261.c] --> [us265.c]
+
+    [functions.c] --> [us263.c]
+    [functions.c] --> [us264.c]
+    [functions.c] --> [structs.h]
+
+    [us263.c] --> [structs.h]
+    [us264.c] --> [structs.h]
+    [us265.c] --> [structs.h]
+}
+
+package "Shared Resources" {
+    [collitions_logs.txt]
+    [Relatorio.txt]
+}
+
+[us263.c] ---> [collitions_logs.txt]
+[us265.c] ---> [collitions_logs.txt]
+[us263.c] ---> [Relatorio.txt]
+
+@enduml
