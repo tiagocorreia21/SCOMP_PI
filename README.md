@@ -34,14 +34,20 @@
 
 - To verify collitions we will use the 3D matrix that has the positions of the drones in a specific time step.
 
-- Upon detecting a collition, the system will notify the user with a message and log the collition at a text file.
+- Upon executing the drone script, values will be generated and a verification with the matrix will occur. 
+
+- Upon detecting a potential collition (same coordinates on x, y or z), the system will notify the user with a message 
+  and log the collition at a text file.
 
 - The implementation modifies the default behavior of the SIGUSR1 signal, defining a custom handler and blocking other 
   signals while the handler is executed. The system also restarts any interrupted system calls.
 
 - To allow early termination upon exceeding a predefined threshold of collitions, we decided to use a control variable 
-   at a shared memory segment. The system will check this variable every time a collition occurs and terminate if this 
-   value is greater than the threshold. The system will also send a termination signal to all drones.
+   which stores the number of collitions in each drone.
+
+- The system will check this variable and every time a potential collition occurs and terminate if this 
+   value is greater than the defined threshold. The system will also send a termination signal to the drone that exceeded
+    the threshold.
 
 - Upon receiving the termination signal, the drones will perform any necessary cleanup and exit. 
 
