@@ -62,22 +62,18 @@ int main() {
 			// child/drone process
 			close(fd[i][0]); // close read
 
-            // simulate writing by child/drone
-            run_drone_script(fd[i][1], TIME_STEPS_NUM);
-
-            struct sigaction act;
+			struct sigaction act;
 
             memset(&act, 0, sizeof(struct sigaction));
 
             act.sa_handler = handle_collition_sigurs1;
-
-            // restard interrupted system calls
             act.sa_flags = SA_RESTART;
-
-            // block all other signals
-            sigfillset(&act.sa_mask);
+            sigfillset(&act.sa_mask); // block all other signals
 
             sigaction(SIGUSR1, &act, NULL);
+
+            // simulate writing by child/drone
+            run_drone_script(fd[i][1], TIME_STEPS_NUM);
 
             close(fd[i][1]);  // close write
             exit(0);

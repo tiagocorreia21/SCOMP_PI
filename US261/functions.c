@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 #include <signal.h>
+#include <string.h>
 
 #define SPACE_X 1000
 #define SPACE_Y 1000
@@ -13,18 +14,24 @@
 //sig_atomic_t para sinais nao interromperem fluxo normal do programa
 volatile sig_atomic_t ready_to_move = 0;
 
-void handler() {
+void handle_sigcont() {
     ready_to_move = 1;
 }
 
 void run_drone_script(int write_fd, int time_step_num) {
 
-    signal(SIGCONT, handler);
+	struct sigaction act2;
 
-    // Example script with random movements
+    memset(&act2, 0, sizeof(struct sigaction));
+
+    act2.sa_handler = handle_sigcont;
+    act2.sa_flags = SA_RESTART;
+    sigfillset(&act2.sa_mask);
+
+    sigaction(SIGCONT, &act2, NULL);
+
     for (int i = 0; i < time_step_num; i++) {
 
-        // Espera por sinal do processo pai
         while (!ready_to_move) {
             pause();
         }
@@ -89,11 +96,9 @@ shared_data_type *allocate_shared_memory(char *shm_name) {
 void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data) {
 	int data_size = sizeof(shared_data_type);
 	munmap(shared_data, data_size);
-	//close(fd);
 	shm_unlink(shm_name);
 }
 
-// Função para alocar a matriz 3D de posições
 Position*** allocate_position_matrix(int num_drones, int time_steps) {
 
     Position*** matrix = (Position***) malloc(time_steps * sizeof(Position**));
@@ -111,14 +116,16 @@ Position*** allocate_position_matrix(int num_drones, int time_steps) {
 
             perror("Failed to allocate memory for drones at a time step");
 
-            // Limpar a memória já alocada
             for (int i = 0; i < t; i++) {
+
             	for (int d = 0; d < num_drones; d++) {
             		free(matrix[i][d]);
             	}
+
                 free(matrix[i]);
             }
             free(matrix);
+
             return NULL;
         }
 
@@ -130,19 +137,20 @@ Position*** allocate_position_matrix(int num_drones, int time_steps) {
 
                 perror("Failed to allocate memory for a position");
 
-                // Limpar a memória já alocada
                 for (int j = 0; j < d; j++) {
                     free(matrix[t][j]);
                 }
                 free(matrix[t]);
 
                 for (int i = 0; i < t; i++) {
+
                     for (int k = 0; k < num_drones; k++) {
                         free(matrix[i][k]);
                     }
                     free(matrix[i]);
                 }
                 free(matrix);
+
                 return NULL;
             }
 
@@ -158,10 +166,13 @@ Position*** allocate_position_matrix(int num_drones, int time_steps) {
 
 // Função para liberar a matriz 3D de posições
 void free_position_matrix(Position*** matrix, int num_drones, int time_steps) {
+
     if (matrix == NULL) return;
 
     for (int t = 0; t < time_steps; t++) {
+
         if (matrix[t] == NULL) continue;
+
         for (int d = 0; d < num_drones; d++) {
             free(matrix[t][d]);
         }
@@ -172,7 +183,6 @@ void free_position_matrix(Position*** matrix, int num_drones, int time_steps) {
 
 Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
 
-    // Basic boundary checks
     if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {
 
          fprintf(stderr, "Error: Attempted to get position out of matrix bounds (drone %d, time %d).\n", drone_id, time_step);
@@ -219,7 +229,9 @@ Position get_position(Position *positions_ptr, int drone_id, int time_step) {
  * @return 1 if successful, 0 if failed
  */
 void capture_drone_movement(int fd, Position *pos) {
+
     int n = read(fd, pos, sizeof(Position));
+
     if (n <= 0) {
         perror("Error reading drone position");
         exit(EXIT_FAILURE);
@@ -233,9 +245,9 @@ void capture_drone_movement(int fd, Position *pos) {
  * @return 1 if movement is valid, 0 if invalid
  */
 int process_movement(Position *current_pos, Position *new_pos) {
-    // Validate that the movement is within reasonable bounds
-    // For example, check if the movement is not too large
-    int max_movement = 10; // Maximum allowed movement in any direction
+
+    // Check if the movement is not too large
+    int max_movement = 1; // Maximum allowed movement in any direction
     
     int dx = abs(new_pos->x - current_pos->x);
     int dy = abs(new_pos->y - current_pos->y);
@@ -260,7 +272,7 @@ void store_position(Position ***positions_ptr, int drone_id, int time_step, Posi
 
     // Ensure the matrix and the target location are allocated
     if (positions_ptr == NULL || positions_ptr[time_step] == NULL || positions_ptr[time_step][drone_id] == NULL) {
-         fprintf(stderr, "Error: Matrix or specific position not allocated.\n");
+        fprintf(stderr, "Error: Matrix or specific position not allocated.\n");
         return;
     }
 
@@ -277,7 +289,9 @@ void store_position(Position ***positions_ptr, int drone_id, int time_step, Posi
  * @param time_step Current time step
  */
 void print_positions(Position ***positions_ptr, int drone_count, int time_step) {
+
     printf("\n===== TIME STEP %d =====\n", time_step);
+
     for (int i = 0; i < drone_count; i++) {
         Position pos = *positions_ptr[time_step][i];
         printf("Drone %d @ (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
@@ -285,9 +299,11 @@ void print_positions(Position ***positions_ptr, int drone_count, int time_step) 
 }
 
 void initialize_drone_positions(Position ***positions_matrix, int time_step_num, int drone_num) {
-    // Initialize positions for each drone at each time step
+
     for (int t = 0; t < time_step_num; t++) {
+
         for (int d = 0; d < drone_num; d++) {
+
             // Initialize with random positions between 0 and 100
             positions_matrix[t][d]->x = rand() % 100;
             positions_matrix[t][d]->y = rand() % 100;
