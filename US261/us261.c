@@ -9,7 +9,6 @@
 #include <sys/mman.h>
 #include "us264.h"
 
-#define POSSIBLE_NODES 10
 #define TIME_STEPS_NUM 5
 #define MAX_COLLISION_NUM 5
 #define DRONE_NUM 10
@@ -102,6 +101,6 @@ int main() {
     }
 
 	printf("Simulation finished with success...\n");
-	shm_unlink("/shm_collitions");
+
 	return 0;
 }

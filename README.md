@@ -2,6 +2,34 @@
 
 ## US261
 
+### Description
+
+- I want to start a simulation process for a figure. So that I can check for collisions before approving it.
+
+### Acceptance Criteria
+
+- This component must be implemented in C and must utilize processes, pipes, and signals.
+
+- The system should fork a new process for each drone in the figure.
+
+- Each drone process should execute its designated movement script.
+
+- Pipes should facilitate communication between the main process and each drone process.
+
+- The main process should track drone positions over time using an appropriate data structure.
+
+### Decisions
+
+- Global variables were defined to control the number of drones for the simulation, the number of time steps and the max
+  number of collitions that each drone process can have.
+
+- We decided to use a pipe for each child process, for the communication with the parent process. The drone positions 
+  are sent from the child processes to the parent process.
+
+- A matrix was defined to track all the drone positions over time.
+
+- We have verifications for the exit status for each drone processes in the parent.
+
 ---
 
 ## US262
