@@ -1,0 +1,37 @@
+@startuml
+
+start
+
+: Initialize shared memory and position matrix;
+: Configure pipes for communication between processes;
+
+fork
+    : Create drone processes (child processes);
+    if (Drone process?) then (Yes)
+        : Configure SIGUSR1 for collitions;
+        : Execute drone script (generate positions and send to the pipe);
+        stop
+    else (No)
+        : Close write file descriptor on parent process;
+    endif
+
+end fork
+
+:Execute simulation;
+repeat
+    :Unblock drones with SIGCONT;
+    :Receive and store drone positions;
+
+    if (Invalid Movement?) then (Yes)
+        :Correct position for a valid one;
+    endif
+
+    :Detect collitions;
+repeat while (Time Steps Num?)
+
+:Wait for drone processes to finish;
+:Close pipes and deallocate memory;
+
+stop
+
+@enduml
