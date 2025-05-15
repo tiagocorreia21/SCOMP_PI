@@ -6,19 +6,21 @@
 #include <sys/mman.h>
 #include <signal.h>
 #include <string.h>
+#include "us263.h"
+#include <time.h>
 
 #define SPACE_X 1000
 #define SPACE_Y 1000
 #define SPACE_Z 1000
 
-//sig_atomic_t para sinais nao interromperem fluxo normal do programa
+//sig_atomic_t for signals not to interrupt the normal order of program
 volatile sig_atomic_t ready_to_move = 0;
 
 void handle_sigcont() {
     ready_to_move = 1;
 }
 
-void run_drone_script(int write_fd, int time_step_num) {
+void run_drone_script(int write_fd, int time_step_num, int drone_num, int *collition_num, int max_collision_num, Position ***position_matrix) {
 
 	struct sigaction act2;
 
@@ -37,9 +39,8 @@ void run_drone_script(int write_fd, int time_step_num) {
         }
         ready_to_move = 0; // reset
 
-        //int valid_position = 0;
-
         Position position;
+        srand(time(NULL));
 
         while (1) {
 
@@ -48,16 +49,15 @@ void run_drone_script(int write_fd, int time_step_num) {
     		position.z = rand() % SPACE_Z;
     		position.time_step = i;
 
-    		//int v = verify_collitions(Position *position_matrix, Position position, time_step_num);
+    		int v = verify_collitions(position_matrix, position, i, drone_num, collition_num, max_collision_num);
 
-			int v = 0;
     		if (v == 0) break;
         }
 
     	int n = write(write_fd, &position, sizeof(position));
 
     	if (n == -1) {
-    		perror("write");
+    		perror("write failed");
     		exit(EXIT_FAILURE);
     	}
     }
@@ -164,7 +164,6 @@ Position*** allocate_position_matrix(int num_drones, int time_steps) {
     return matrix;
 }
 
-// Função para liberar a matriz 3D de posições
 void free_position_matrix(Position*** matrix, int num_drones, int time_steps) {
 
     if (matrix == NULL) return;
@@ -200,8 +199,7 @@ Position get_position_3d(Position*** matrix, int drone_id, int time_step, int nu
 
          fprintf(stderr, "Error: Matrix or specific position not allocated at (drone %d, time %d).\n", drone_id, time_step);
 
-         // Return a default or invalid position
-
+         // Return invalid position
          Position invalid_position;
 
          invalid_position.x = -1;
@@ -245,7 +243,6 @@ void capture_drone_movement(int fd, Position *pos) {
  * @return 1 if movement is valid, 0 if invalid
  */
 int process_movement(Position *current_pos, Position *new_pos) {
-
     // Check if the movement is not too large
     int max_movement = 1; // Maximum allowed movement in any direction
     

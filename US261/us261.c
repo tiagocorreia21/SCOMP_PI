@@ -6,7 +6,6 @@
 #include <sys/wait.h>
 #include "structs.h"
 #include "functions.h"
-#include <time.h>
 #include <sys/mman.h>
 #include "us264.h"
 
@@ -20,25 +19,16 @@ void handle_collition_sigurs1() {
 }
 
 int main() {
-	srand(time(NULL));
-
-	shm_unlink("/shm_collitions");
-	
-    //shared_data_type *shared_data = allocate_shared_memory("/shm_collitions");
 
 	// Allocate the 3D matrix for drone positions dynamically
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
 
-
 	if (positions_matrix == NULL) {
-        // Error message already printed in allocate_position_matrix
-        // Need to clean up shared memory here if it was allocated successfully
-        // free_shared_memory(shared_data, "/shm_collitions");
         return EXIT_FAILURE;
     }
 
 	int fd[DRONE_NUM][2]; //Pipes
-	int p[DRONE_NUM]; //PIDs
+	int p[DRONE_NUM];     //PIDs
 
 	// create a pipe for each child
 	printf("Setup of pipes in progress...\n\n");
@@ -48,6 +38,8 @@ int main() {
 			exit(1);
 		}
 	}
+
+	int collition_num = 0;
 
 	for (int i = 0; i < DRONE_NUM; i++) {
 
@@ -72,8 +64,7 @@ int main() {
 
             sigaction(SIGUSR1, &act, NULL);
 
-            // simulate writing by child/drone
-            run_drone_script(fd[i][1], TIME_STEPS_NUM);
+            run_drone_script(fd[i][1], TIME_STEPS_NUM, DRONE_NUM, &collition_num, MAX_COLLISION_NUM, positions_matrix);
 
             close(fd[i][1]);  // close write
             exit(0);
@@ -84,7 +75,6 @@ int main() {
 	
 	//Parent Process
 
-	// Fechar escrita no pai (só vai ler)
     for (int i = 0; i < DRONE_NUM; i++) {
         close(fd[i][1]);
     }

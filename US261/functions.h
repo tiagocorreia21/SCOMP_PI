@@ -3,7 +3,6 @@
 
 #include "structs.h"
 
-// US262 functions
 void capture_drone_movement(int fd, Position *pos);
 
 int process_movement(Position *current_pos, Position *new_pos);
@@ -12,7 +11,7 @@ void store_position(Position ***positions_ptr, int drone_id, int time_step, Posi
 
 void print_positions(Position ***positions_ptr, int drone_count, int time_step);
 
-void run_drone_script(int write_fd, int drone_num);
+void run_drone_script(int write_fd, int time_step_num, int drone_num, int *collition_num, int max_collision_num, Position ***position_matrix);
 
 void initialize_drone_positions(Position ***positions_matrix, int time_step_num, int drone_num);
 
