@@ -2,15 +2,28 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include "structs.h"
+#include "functions.h"
+
 
 void report_generator(Position ***position_Matrix, int num_Drones, int time_Steps) {
 
-    FILE *file = fopen("collitions_logs.txt", "w");
-    FILE *relatorio = fopen("Relatorio.txt", "w");
+	FILE *file = fopen("collitions_logs.txt", "r");
 
-    if (file == NULL) {
+    char filename[64];
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    strftime(filename, sizeof(filename), "Relatorio_%Y-%m-%d_%H-%M-%S.txt", t);
+
+    FILE *relatorio = fopen(filename, "w");
+    
+    if (file == NULL || relatorio == NULL) {
         perror("fopen failed");
-        exit(1);
+        if (file != NULL) fclose(file);
+			if (relatorio != NULL) fclose(relatorio);
+				exit(1);
     }
 
 
@@ -26,16 +39,19 @@ void report_generator(Position ***position_Matrix, int num_Drones, int time_Step
     for(int i = 0; i < num_Drones; i++){
         fprintf(relatorio, "=======Drone %d=======\n", i);
         for(int j = 0; j < time_Steps; j++){
-
-        Position position=get_position_3d(position_Matrix, i, j, num_Drones, time_Steps);
-        fprintf(relatorio, "Drone %d, Cordenadas -> ( %d, %d, %d ) ", i, position.x, position.y, position.z);
-
+			
+			Position position=get_position_3d(position_Matrix, i, j, num_Drones, time_Steps);
+			fprintf(relatorio, "Cordenadas -> ( %d, %d, %d )\n ", position.x, position.y, position.z);
+			
         }
 
     }
 
 
+	fclose(file);
+    fclose(relatorio);
 
+    printf("Relatório salvo em: %s\n", filename);
 
 
 }

@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "structs.h"
 #include "functions.h"
+#include "us265.h"
 
 
 void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps) {
@@ -53,4 +54,5 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
     }
 
     //Chamar US265
+	report_generator(positions_ptr, drone_count, time_steps);
 }
