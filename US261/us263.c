@@ -7,16 +7,16 @@
 #include "functions.h"
 
 /**
- * Verify Collitions
+ * Verify Collisions
  * @param Position Matrix
  * @param Generated Position
  * @param Time Step
  * @param Number of Drones
- * @param Number of collition of the current drone
- * @param Max collitions allowed for each drone
- * @return 1 if collition, 0 if no collition
+ * @param Number of collisions of the current drone
+ * @param Max collisions allowed for each drone
+ * @return 1 if collision, 0 if no collision
  */
-int verify_collitions(Position ***position_matrix, Position generated_position, int time_step, int drone_num, int *collition_num, int max_collition_num) {
+int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num, int *collision_num, int max_collision_num) {
 
 	for (int i = 0; i < drone_num; i++) {
 
@@ -24,12 +24,12 @@ int verify_collitions(Position ***position_matrix, Position generated_position, 
 
 		if (pos.x == generated_position.x || pos.y == generated_position.y || pos.z == generated_position.z) {
 
-			if (*collition_num >= max_collition_num) {
-				printf("Drone Process PID %d terminating. Collition Threshold exceeded\n", getpid());
+			if (*collision_num >= max_collision_num) {
+				printf("Drone Process PID %d terminating. Collision Threshold exceeded\n", getpid());
 				raise(SIGINT);
 			}
 
-			(*collition_num)++;
+			//(*collition_num)++;
 
             FILE *file = fopen("collitions_logs.txt", "w");
 
@@ -38,7 +38,7 @@ int verify_collitions(Position ***position_matrix, Position generated_position, 
                 exit(1);
             }
 
-            fprintf(file, "Collition detected between generated position and drone %d at time step %d\n", i, time_step);
+            fprintf(file, "Collision detected between generated position and drone %d at time step %d\n", i, time_step);
 
             fclose(file);
 

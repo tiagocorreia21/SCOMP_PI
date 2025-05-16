@@ -6,12 +6,14 @@
 #include <sys/mman.h>
 #include <signal.h>
 #include <string.h>
-#include "us263.h"
 #include <time.h>
 
 #define SPACE_X 1000
 #define SPACE_Y 1000
 #define SPACE_Z 1000
+#define TIME_STEPS_NUM 2
+#define DRONE_NUM 5
+#define INVALID_POSITION -1
 
 //sig_atomic_t for signals not to interrupt the normal order of program
 volatile sig_atomic_t ready_to_move = 0;
@@ -20,9 +22,67 @@ void handle_sigcont() {
     ready_to_move = 1;
 }
 
-void run_drone_script(int write_fd, int time_step_num, int drone_num, int *collition_num, int max_collision_num, Position ***position_matrix) {
+Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
 
-	struct sigaction act2;
+    if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {
+
+         fprintf(stderr, "Error: Attempted to get position out of matrix bounds (drone %d, time %d).\n", drone_id, time_step);
+
+         Position invalid_position;
+         invalid_position.x = INVALID_POSITION;
+         invalid_position.y = INVALID_POSITION;
+         invalid_position.z = INVALID_POSITION;
+
+         return invalid_position;
+    }
+
+    // Ensure the memory is allocated at this location
+    if (matrix == NULL || matrix[time_step] == NULL || matrix[time_step][drone_id] == NULL) {
+
+         fprintf(stderr, "Error: Matrix or specific position not allocated at (drone %d, time %d).\n", drone_id, time_step);
+
+         // Return invalid position
+         Position invalid_position;
+
+         invalid_position.x = INVALID_POSITION;
+         invalid_position.y = INVALID_POSITION;
+         invalid_position.z = INVALID_POSITION;
+
+         return invalid_position;
+    }
+
+    // Return the Position struct by dereferencing the pointer at the correct location
+    return *matrix[time_step][drone_id];
+}
+
+Position get_position(Position *positions_ptr, int drone_id, int time_step) {
+    // Cast the pointer to a 3D matrix
+    Position (*positions)[time_step] = (Position (*)[time_step])positions_ptr;
+
+    return positions[drone_id][time_step];
+}
+
+Position generate_position(Position ***position_matrix, int drone_id, int time_step) {
+
+    Position last_position = get_position_3d(position_matrix, drone_id, time_step - 1, DRONE_NUM, TIME_STEPS_NUM);
+
+	srand(time(NULL));
+
+	int dx = (rand() % 3) - 1;
+    int dy = (rand() % 3) - 1;
+    int dz = (rand() % 3) - 1;
+
+	Position next_position;
+    next_position.x = last_position.x + dx;
+    next_position.y = last_position.y + dy;
+    next_position.z = last_position.z + dz;
+
+    return next_position;
+}
+
+void run_drone_script(int write_fd, int time_step, Position ***position_matrix, int drone_id) {
+
+    struct sigaction act2;
 
     memset(&act2, 0, sizeof(struct sigaction));
 
@@ -32,71 +92,22 @@ void run_drone_script(int write_fd, int time_step_num, int drone_num, int *colli
 
     sigaction(SIGCONT, &act2, NULL);
 
-    for (int i = 0; i < time_step_num; i++) {
-
-        while (!ready_to_move) {
-            pause();
-        }
-        ready_to_move = 0; // reset
-
-        Position position;
-        srand(time(NULL));
-
-        while (1) {
-
-    		position.x = rand() % SPACE_X;
-    		position.y = rand() % SPACE_Y;
-    		position.z = rand() % SPACE_Z;
-    		position.time_step = i;
-
-    		int v = verify_collitions(position_matrix, position, i, drone_num, collition_num, max_collision_num);
-
-    		if (v == 0) break;
-        }
-
-    	int n = write(write_fd, &position, sizeof(position));
-
-    	if (n == -1) {
-    		perror("write failed");
-    		exit(EXIT_FAILURE);
-    	}
+    while (!ready_to_move) {
+    	pause();
     }
-}
+    ready_to_move = 0; // reset
 
-shared_data_type *allocate_shared_memory(char *shm_name) {
+	Position new_position = generate_position(position_matrix, drone_id, time_step);
 
-    int data_size = sizeof(shared_data_type);
+	new_position.pid = getpid();
+	new_position.drone_id = drone_id;
 
-    shared_data_type *shared_data;
+	int n = write(write_fd, &new_position, sizeof(new_position));
 
-    int fd = shm_open(shm_name, O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
-
-    if (fd == -1) {
-        perror("shm_open failed");
-        exit(1);
-    }
-
-    int ftuncate = ftruncate(fd, data_size);
-
-    if (ftuncate == -1) {
-        perror("ftruncate failed");
-        exit(1);
-    }
-
-    shared_data = (shared_data_type *) mmap(NULL, data_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-
-    if (shared_data == MAP_FAILED) {
-        perror("mmap failed");
-        exit(1);
-    }
-
-    return shared_data;
-}
-
-void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data) {
-	int data_size = sizeof(shared_data_type);
-	munmap(shared_data, data_size);
-	shm_unlink(shm_name);
+    if (n == -1) {
+    	perror("write failed");
+    	exit(EXIT_FAILURE);
+   	}
 }
 
 Position*** allocate_position_matrix(int num_drones, int time_steps) {
@@ -180,46 +191,6 @@ void free_position_matrix(Position*** matrix, int num_drones, int time_steps) {
     free(matrix);
 }
 
-Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
-
-    if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {
-
-         fprintf(stderr, "Error: Attempted to get position out of matrix bounds (drone %d, time %d).\n", drone_id, time_step);
-
-         Position invalid_position;
-         invalid_position.x = -1;
-         invalid_position.y = -1;
-         invalid_position.z = -1;
-
-         return invalid_position;
-    }
-
-    // Ensure the memory is allocated at this location
-    if (matrix == NULL || matrix[time_step] == NULL || matrix[time_step][drone_id] == NULL) {
-
-         fprintf(stderr, "Error: Matrix or specific position not allocated at (drone %d, time %d).\n", drone_id, time_step);
-
-         // Return invalid position
-         Position invalid_position;
-
-         invalid_position.x = -1;
-         invalid_position.y = -1;
-         invalid_position.z = -1;
-
-         return invalid_position;
-    }
-
-    // Return the Position struct by dereferencing the pointer at the correct location
-    return *matrix[time_step][drone_id];
-}
-
-Position get_position(Position *positions_ptr, int drone_id, int time_step) {
-    // Cast the pointer to a 3D matrix
-    Position (*positions)[time_step] = (Position (*)[time_step])positions_ptr;
-    
-    return positions[drone_id][time_step];
-}
-
 /**
  * Captures drone movement from the pipe
  * @param fd File descriptor for the pipe
@@ -301,11 +272,10 @@ void initialize_drone_positions(Position ***positions_matrix, int time_step_num,
 
         for (int d = 0; d < drone_num; d++) {
 
-            // Initialize with random positions between 0 and 100
-            positions_matrix[t][d]->x = rand() % 100;
-            positions_matrix[t][d]->y = rand() % 100;
-            positions_matrix[t][d]->z = rand() % 100;
+            positions_matrix[t][d]->x = 0;
+            positions_matrix[t][d]->y = 0;
+            positions_matrix[t][d]->z = 0;
             positions_matrix[t][d]->time_step = t;
         }
     }
-} 
+}

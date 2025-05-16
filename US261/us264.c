@@ -5,7 +5,7 @@
 #include "structs.h"
 #include "functions.h"
 #include "us265.h"
-
+#include "us263.h"
 
 void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps) {
     //cast do ponteiro para matriz positions[drone_count][time_steps]
@@ -27,6 +27,9 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
             
             // Capture the drone movement
             capture_drone_movement(fd[i][0], &pos);
+
+            // verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num, int *collision_num, int max_collision_num)
+            //int c = verify_collition(positions_ptr, pos, t, drone_count, );
             
             // If not the first time step, validate the movement
             if (t > 0) {
@@ -39,18 +42,16 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
                     // Use the last valid position
                     pos = current_pos;
                 }
+
             }
             
             // Store the position
             store_position(drone_positions_matrix, i, t, pos);
-            printf("Drone %d @ (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
+            //printf("Drone %d @ (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
         }
 
         // Print current positions for all drones
         print_positions(drone_positions_matrix, drone_count, t);
-
-        // US263
-        //detect_collisions(positions, t, drone_count, pids, shared_data, max_collition_num);
     }
 
     //Chamar US265

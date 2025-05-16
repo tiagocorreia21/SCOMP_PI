@@ -6,17 +6,8 @@ typedef struct {
     int y;
     int z;
     int time_step;
-} Position;
-
-typedef struct {
-    Position current_position;
-    int fd[2];
+    int drone_id;
     int pid;
-    int active;
-} DroneInfo;
-
-typedef struct {
-    int collition_num;
-} shared_data_type;
+} Position;
 
 #endif
