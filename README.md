@@ -80,9 +80,30 @@
 - Upon receiving the termination signal, the drones will perform any necessary cleanup and exit. 
 
 ---
+## US264 - Synchronize drone execution with a time step
 
-## US264
+### Description
 
+- As a simulation engine, I want to synchronize drone movements based on 
+time steps so that I can accurately simulate real-world execution.
+
+
+### Acceptance Criteria
+
+- The simulation must progress step by step.
+
+- Each drone process should send position updates at defined
+  intervals.
+
+- Each drone process should send position updates at defined
+  intervals.
+
+### Decisions
+
+- To simulate a real world simulation and synchronize drone movements based on time steps we use a loop.
+- In each time step, we send the signal to each drone to continue the execution. We choose the signal 'SIGCONT - continue after stop'.
+- After sending the signal, we call us262 to read and save the drone positions.
+- Then the us263 to detect and prevent collisions
 ---
 
 ## US265
