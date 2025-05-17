@@ -34,6 +34,26 @@
 
 ## US262
 
+### Description
+
+  - As a simulation process, I want to receive movement commands from drone scripts so taht I can track drone positions over time.
+
+### Acceptance criteria
+
+  - Each drone process must send position updates to the main process via a pipe.
+
+  - The main process should maintain a time-indexed 3D matrix to track drone positions.
+
+  - The system must store past positions to anticipate and detect potential collisions.
+
+### Decision
+
+  - Each drone writes its position data to a dedicated pipe, and the main simulation process will read from the read end of all drone pipes.
+  
+  - The 3D matrix (in form of a pointer) will store the position of the drone over time with the dimensions like `time_step`, `drone_id`, `position`.
+
+  - With the position for each drone in each time step stored in the 3D matrix, it can be later processed to help detect potential collisions.
+  
 ---
 
 ## US263 - Detect Drone Collitions
