@@ -16,20 +16,13 @@
  * @param Max collisions allowed for each drone
  * @return 1 if collision, 0 if no collision
  */
-int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num, int *collision_num, int max_collision_num) {
+int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num) {
 
 	for (int i = 0; i < drone_num; i++) {
 
 		Position pos = get_position_3d(position_matrix, i, time_step, drone_num, time_step);
 
 		if (pos.x == generated_position.x || pos.y == generated_position.y || pos.z == generated_position.z) {
-
-			if (*collision_num >= max_collision_num) {
-				printf("Drone Process PID %d terminating. Collision Threshold exceeded\n", getpid());
-				raise(SIGINT);
-			}
-
-			//(*collition_num)++;
 
             FILE *file = fopen("collitions_logs.txt", "w");
 

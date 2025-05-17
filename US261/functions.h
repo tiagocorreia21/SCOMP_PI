@@ -25,4 +25,8 @@ Position get_position(Position *positions_ptr, int drone_id, int time_step);
 
 Position generate_position(Position ***position_matrix, int drone_id, int time_step);
 
+shared_data_type *allocate_shared_memory(char *shm_name);
+
+void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data);
+
 #endif

@@ -14,7 +14,7 @@
 #define DRONE_NUM 5
 
 //sig_atomic_t for signals not to interrupt the normal order of program
-volatile sig_atomic_t ready_to_move = 0;
+volatile sig_atomic_t ready_to_move;
 
 void handle_sigcont() {
     ready_to_move = 1;
@@ -51,6 +51,10 @@ void setup_sicont() {
 }
 
 int main() {
+
+    ready_to_move = 0;
+
+    shared_data_type *shared_data = allocate_shared_memory("/shm_child_collitions");
 
 	// Allocate the 3D matrix for drone positions dynamically
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
@@ -129,12 +133,14 @@ int main() {
     }
 
     //us264
-    run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM);
+    run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM, *shared_data, MAX_COLLISION_NUM);
 
 	//close read
     for (int i = 0; i < DRONE_NUM; i++) {
         close(fd[i][0]);
     }
+
+    deallocate_shared_memory("/shm_child_collitions", shared_data);
 
 	printf("Simulation finished with success...\n");
 

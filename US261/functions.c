@@ -15,6 +15,42 @@
 #define DRONE_NUM 5
 #define INVALID_POSITION -1
 
+shared_data_type *allocate_shared_memory(char *shm_name) {
+
+    int data_size = sizeof(shared_data_type);
+
+    shared_data_type *shared_data;
+
+    int fd = shm_open(shm_name, O_CREAT | O_EXCL | O_RDWR, S_IRUSR | S_IWUSR);
+
+    if (fd == -1) {
+        perror("shm_open failed");
+        exit(1);
+    }
+
+    int ftuncate = ftruncate(fd, data_size);
+
+    if (ftuncate == -1) {
+        perror("ftruncate failed");
+        exit(1);
+    }
+
+    shared_data = (shared_data_type *)mmap(NULL, data_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+    if (shared_data == MAP_FAILED) {
+        perror("mmap failed");
+        exit(1);
+    }
+
+    return shared_data;
+}
+
+void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data) {
+    int data_size = sizeof(shared_data_type);
+    munmap(shared_data, data_size);
+    shm_unlink(shm_name);
+}
+
 Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
 
     if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {

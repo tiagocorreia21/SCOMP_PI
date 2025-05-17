@@ -1,6 +1,8 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
+#define DRONE_NUM 5
+
 typedef struct {
     int x;
     int y;
@@ -9,5 +11,9 @@ typedef struct {
     int drone_id;
     int pid;
 } Position;
+
+typedef struct {
+    int child_collitions[DRONE_NUM];
+} shared_data_type;
 
 #endif

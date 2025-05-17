@@ -7,7 +7,7 @@
 #include "us265.h"
 #include "us263.h"
 
-void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps) {
+void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps, shared_data_type shared_data, int max_collition_num) {
     //cast do ponteiro para matriz positions[drone_count][time_steps]
     Position ***drone_positions_matrix = positions_ptr;
 
@@ -29,8 +29,19 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
             // Capture the drone movement
             capture_drone_movement(fd[i][0], &pos);
 
-            // verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num, int *collision_num, int max_collision_num)
-            //int c = verify_collition(positions_ptr, pos, t, drone_count, );
+            int drone_id = pos.drone_id;
+
+            // verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num)
+            int collition_result = verify_collisions(positions_ptr, pos, t, drone_count);
+
+            if (collition_result == 1) {
+
+                shared_data.child_collitions[drone_id]++;
+
+                if (shared_data.child_collitions[drone_id] >= max_collition_num) {
+                    kill(pos.pid, SIGINT);
+                }
+            }
             
             // If not the first time step, validate the movement
             if (t > 0) {
