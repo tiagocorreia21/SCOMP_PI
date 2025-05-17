@@ -12,8 +12,6 @@
  * @param Generated Position
  * @param Time Step
  * @param Number of Drones
- * @param Number of collisions of the current drone
- * @param Max collisions allowed for each drone
  * @return 1 if collision, 0 if no collision
  */
 int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num) {
