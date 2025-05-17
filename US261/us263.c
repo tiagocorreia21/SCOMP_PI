@@ -14,11 +14,10 @@
  * @param Number of Drones
  * @return 1 if collision, 0 if no collision
  */
-int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num) {
+int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num, int time_steps_num) {
 
 	for (int i = 0; i < drone_num; i++) {
-
-		Position pos = get_position_3d(position_matrix, i, time_step, drone_num, time_step);
+		Position pos = get_position_3d(position_matrix, i, time_step, drone_num, time_steps_num);
 
 		if (pos.x == generated_position.x || pos.y == generated_position.y || pos.z == generated_position.z) {
 

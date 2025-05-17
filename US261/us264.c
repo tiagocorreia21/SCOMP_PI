@@ -32,7 +32,7 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
 
             int drone_id = pos.drone_id;
 
-            int collition_result = verify_collisions(positions_ptr, pos, t, drone_count);
+            int collition_result = verify_collisions(positions_ptr, pos, t, drone_count, time_steps);
 
             if (collition_result == 1) {
 

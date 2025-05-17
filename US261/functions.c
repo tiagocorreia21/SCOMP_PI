@@ -52,7 +52,6 @@ void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data) {
 }
 
 Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
-
     if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {
 
          fprintf(stderr, "Error: Attempted to get position out of matrix bounds (drone %d, time %d).\n", drone_id, time_step);

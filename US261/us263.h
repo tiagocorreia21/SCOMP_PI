@@ -3,6 +3,6 @@
 
 #include "structs.h"
 
-int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num);
+int verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num, int time_steps_num);
 
 #endif
