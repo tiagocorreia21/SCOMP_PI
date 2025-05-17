@@ -19,19 +19,19 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
         for (int i = 0; i < drone_count; i++) {
             printf("Parent: Sending SIGCONT to drone %d (PID %d)\n", i, pids[i]);
             kill(pids[i], SIGCONT);
+            sleep(1);
         }
 
         // US262 – receber e armazenar posições
         for (int i = 0; i < drone_count; i++) {
 
             Position pos;
-            
-            // Capture the drone movement
+
             capture_drone_movement(fd[i][0], &pos);
+            printf("Parent: Received position from drone %d: (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
 
             int drone_id = pos.drone_id;
 
-            // verify_collisions(Position ***position_matrix, Position generated_position, int time_step, int drone_num)
             int collition_result = verify_collisions(positions_ptr, pos, t, drone_count);
 
             if (collition_result == 1) {
@@ -42,7 +42,7 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
                     kill(pos.pid, SIGINT);
                 }
             }
-            
+
             // If not the first time step, validate the movement
             if (t > 0) {
 
@@ -54,10 +54,8 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
                     // Use the last valid position
                     pos = current_pos;
                 }
-
             }
-            
-            // Store the position
+
             store_position(drone_positions_matrix, i, t, pos);
             //printf("Drone %d @ (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
         }

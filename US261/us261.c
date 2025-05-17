@@ -52,9 +52,13 @@ void setup_sicont() {
 
 int main() {
 
-    ready_to_move = 0;
+    ready_to_move = 1;
 
     shared_data_type *shared_data = allocate_shared_memory("/shm_child_collitions");
+
+    for (int i = 0; i < DRONE_NUM; i++) {
+        shared_data->child_collitions[i] = 0;
+    }
 
 	// Allocate the 3D matrix for drone positions dynamically
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
@@ -76,8 +80,6 @@ int main() {
 			exit(1);
 		}
 	}
-
-	//int collition_num = 0;
 
 	for (int i = 0; i < DRONE_NUM; i++) {
 
@@ -114,19 +116,7 @@ int main() {
 	
 	//Parent Process
 
-	// wait for all the child process to finish
-    printf("Waiting for drone processes to finish...\n\n");
-    for (int i = 0; i < DRONE_NUM; i++) {
 
-    	int status;
-
-    	int finished_pid = waitpid(p[i], &status, 0);
-
-    	if (WIFEXITED(status)) {
-    		printf("Drone %d with PID %d ended with value %d\n", i, finished_pid, WEXITSTATUS(status));
-    	}
-    }
-    printf("============================================\n\n");
 
     for (int i = 0; i < DRONE_NUM; i++) {
         close(fd[i][1]);
@@ -135,12 +125,27 @@ int main() {
     //us264
     run_simulation(p, fd, positions_matrix, DRONE_NUM, TIME_STEPS_NUM, *shared_data, MAX_COLLISION_NUM);
 
+    // wait for all the child process to finish
+    printf("Waiting for drone processes to finish...\n\n");
+    for (int i = 0; i < DRONE_NUM; i++) {
+
+     	int status;
+
+       	int finished_pid = waitpid(p[i], &status, 0);
+
+       	if (WIFEXITED(status)) {
+       		printf("Drone %d with PID %d ended with value %d\n", i, finished_pid, WEXITSTATUS(status));
+       	}
+    }
+    printf("============================================\n\n");
+
 	//close read
     for (int i = 0; i < DRONE_NUM; i++) {
         close(fd[i][0]);
     }
 
     deallocate_shared_memory("/shm_child_collitions", shared_data);
+    free_position_matrix(positions_matrix, DRONE_NUM, TIME_STEPS_NUM);
 
 	printf("Simulation finished with success...\n");
 
