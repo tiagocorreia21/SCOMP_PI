@@ -13,6 +13,13 @@
 #define MAX_COLLISION_NUM 5
 #define DRONE_NUM 5
 
+//sig_atomic_t for signals not to interrupt the normal order of program
+volatile sig_atomic_t ready_to_move = 0;
+
+void handle_sigcont() {
+    ready_to_move = 1;
+}
+
 void handle_collition_sigurs1() {
     write(STDOUT_FILENO, "\nCollition Detected\n", 20);
 }
@@ -28,6 +35,19 @@ void setup_sigusr1() {
     sigfillset(&act.sa_mask); // block all other signals
 
     sigaction(SIGUSR1, &act, NULL);
+}
+
+void setup_sicont() {
+
+    struct sigaction act2;
+
+    memset(&act2, 0, sizeof(struct sigaction));
+
+    act2.sa_handler = handle_sigcont;
+    act2.sa_flags = SA_RESTART;
+    sigfillset(&act2.sa_mask);
+
+    sigaction(SIGCONT, &act2, NULL);
 }
 
 int main() {
@@ -53,7 +73,7 @@ int main() {
 		}
 	}
 
-	int collition_num = 0;
+	//int collition_num = 0;
 
 	for (int i = 0; i < DRONE_NUM; i++) {
 
@@ -69,9 +89,16 @@ int main() {
 			close(fd[i][0]); // close read
 
 			setup_sigusr1();
+			setup_sicont();
 
             for (int j = 1; j < TIME_STEPS_NUM; j++) {
-            	run_drone_script(fd[i][1], j, positions_matrix, i);
+
+                while (!ready_to_move) {
+                    pause();
+                }
+                ready_to_move = 0; // reset
+
+            	run_drone_script(fd[i][1], j, positions_matrix, i, TIME_STEPS_NUM);
             }
 
             close(fd[i][1]);  // close write

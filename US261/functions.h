@@ -11,7 +11,7 @@ void store_position(Position ***positions_ptr, int drone_id, int time_step, Posi
 
 void print_positions(Position ***positions_ptr, int drone_count, int time_step);
 
-void run_drone_script(int write_fd, int time_step_num, Position ***position_matrix, int drone_id);
+void run_drone_script(int write_fd, int time_step_num, Position ***position_matrix, int drone_id, int time_steps);
 
 void initialize_drone_positions(Position ***positions_matrix, int time_step_num, int drone_num);
 

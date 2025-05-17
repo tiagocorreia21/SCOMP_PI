@@ -17,6 +17,7 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
 
         //US264 – desbloquear os drones com SIGCONT
         for (int i = 0; i < drone_count; i++) {
+            printf("Parent: Sending SIGCONT to drone %d (PID %d)\n", i, pids[i]);
             kill(pids[i], SIGCONT);
         }
 

@@ -15,13 +15,6 @@
 #define DRONE_NUM 5
 #define INVALID_POSITION -1
 
-//sig_atomic_t for signals not to interrupt the normal order of program
-volatile sig_atomic_t ready_to_move = 0;
-
-void handle_sigcont() {
-    ready_to_move = 1;
-}
-
 Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
 
     if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {
@@ -80,34 +73,26 @@ Position generate_position(Position ***position_matrix, int drone_id, int time_s
     return next_position;
 }
 
-void run_drone_script(int write_fd, int time_step, Position ***position_matrix, int drone_id) {
+void run_drone_script(int write_fd, int time_step, Position ***position_matrix, int drone_id, int time_steps) {
 
-    struct sigaction act2;
+    for (int i = 0; i < time_steps; i++) {
 
-    memset(&act2, 0, sizeof(struct sigaction));
+        printf("Drone %d: Generating position for time step %d\n", drone_id, time_step);
 
-    act2.sa_handler = handle_sigcont;
-    act2.sa_flags = SA_RESTART;
-    sigfillset(&act2.sa_mask);
+        Position new_position = generate_position(position_matrix, drone_id, time_step);
 
-    sigaction(SIGCONT, &act2, NULL);
+        new_position.pid = getpid();
+        new_position.drone_id = drone_id;
 
-    while (!ready_to_move) {
-    	pause();
+        int n = write(write_fd, &new_position, sizeof(new_position));
+
+        if (n == -1) {
+           	perror("write failed");
+           	exit(EXIT_FAILURE);
+        }
+        printf("Drone %d: Position written to pipe\n", drone_id);
     }
-    ready_to_move = 0; // reset
-
-	Position new_position = generate_position(position_matrix, drone_id, time_step);
-
-	new_position.pid = getpid();
-	new_position.drone_id = drone_id;
-
-	int n = write(write_fd, &new_position, sizeof(new_position));
-
-    if (n == -1) {
-    	perror("write failed");
-    	exit(EXIT_FAILURE);
-   	}
+    printf("\n");
 }
 
 Position*** allocate_position_matrix(int num_drones, int time_steps) {
