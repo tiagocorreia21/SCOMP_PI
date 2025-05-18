@@ -13,13 +13,10 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
 
     for (int t = 0; t < time_steps; t++) {
 
-        printf("\n===== TIME STEP %d =====\n", t);
-
         //US264
         for (int i = 0; i < drone_count; i++) {
             //printf("Parent: Sending SIGCONT to drone %d (PID %d)\n", i, pids[i]);
             kill(pids[i], SIGCONT);
-            sleep(1);
         }
 
         // US262

@@ -8,11 +8,11 @@
 #include <string.h>
 #include <time.h>
 
-#define SPACE_X 100
-#define SPACE_Y 100
-#define SPACE_Z 100
+#define SPACE_X 1000
+#define SPACE_Y 1000
+#define SPACE_Z 1000
 #define TIME_STEPS_NUM 5
-#define DRONE_NUM 10
+#define DRONE_NUM 50
 #define INVALID_POSITION -999
 
 shared_data_type *allocate_shared_memory(char *shm_name) {
@@ -112,7 +112,7 @@ void run_drone_script(int write_fd, int time_step, Position ***position_matrix, 
 
     for (int i = 0; i < time_steps; i++) {
 
-        printf("Drone %d: Generating position for time step %d\n", drone_id, time_step);
+        //printf("Drone %d: Generating position for time step %d\n", drone_id, time_step);
 
         Position new_position = generate_position(position_matrix, drone_id, time_step);
 
@@ -125,7 +125,7 @@ void run_drone_script(int write_fd, int time_step, Position ***position_matrix, 
            	perror("write failed");
            	exit(EXIT_FAILURE);
         }
-        printf("Drone %d: Position written to pipe\n", drone_id);
+        //printf("Drone %d: Position written to pipe\n", drone_id);
     }
     printf("\n");
 }

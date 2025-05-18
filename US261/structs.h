@@ -1,7 +1,7 @@
 #ifndef STRUCTS_H
 #define STRUCTS_H
 
-#define DRONE_NUM 10
+#define DRONE_NUM 50
 
 typedef struct {
     int x;

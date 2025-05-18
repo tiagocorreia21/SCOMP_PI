@@ -11,7 +11,7 @@
 
 #define TIME_STEPS_NUM 5
 #define MAX_COLLISION_NUM 2
-#define DRONE_NUM 10
+#define DRONE_NUM 50
 
 //sig_atomic_t for signals not to interrupt the normal order of program
 volatile sig_atomic_t ready_to_move;
@@ -22,6 +22,24 @@ void handle_sigcont() {
 
 void handle_collition_sigurs1() {
     write(STDOUT_FILENO, "\nCollition Detected\n", 20);
+}
+
+void handle_sigint() {
+    write(STDOUT_FILENO, "\nDrone process terminating. Collition threshold exeeded.\n", 57);
+    exit(10);
+}
+
+void setup_sigint() {
+
+    struct sigaction act3;
+
+    memset(&act3, 0, sizeof(struct sigaction));
+
+    act3.sa_handler = handle_sigint;
+    act3.sa_flags = SA_RESTART;
+    sigfillset(&act3.sa_mask); // block all other signals
+
+    sigaction(SIGINT, &act3, NULL);
 }
 
 void setup_sigusr1() {
@@ -96,6 +114,7 @@ int main() {
 
 			setup_sigusr1();
 			setup_sicont();
+			setup_sigint();
 
             for (int j = 1; j < TIME_STEPS_NUM; j++) {
 
@@ -115,8 +134,6 @@ int main() {
 	//=================================================================================================================
 	
 	//Parent Process
-
-
 
     for (int i = 0; i < DRONE_NUM; i++) {
         close(fd[i][1]);
