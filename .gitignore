@@ -1,3 +1,4 @@
 ### Ignore Compilation files ###
 *.o
 *.txt
+collitions_logs.txt
