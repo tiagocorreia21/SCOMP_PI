@@ -51,10 +51,12 @@ void setup_sicont() {
 }
 
 int main() {
+	
 
     ready_to_move = 1;
 
     shared_data_type *shared_data = allocate_shared_memory("/shm_child_collitions");
+    
 
     for (int i = 0; i < DRONE_NUM; i++) {
         shared_data->child_collitions[i] = 0;
@@ -64,6 +66,8 @@ int main() {
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
 
 	initialize_drone_positions(positions_matrix, TIME_STEPS_NUM, DRONE_NUM);
+	
+	
 
 	if (positions_matrix == NULL) {
         return EXIT_FAILURE;
@@ -97,14 +101,16 @@ int main() {
 			setup_sigusr1();
 			setup_sicont();
 
-            for (int j = 1; j < TIME_STEPS_NUM; j++) {
+            for (int j = 0; j < TIME_STEPS_NUM; j++) {
 
-                while (!ready_to_move) {
-                    pause();
-                }
+               
                 ready_to_move = 0; // reset
 
             	run_drone_script(fd[i][1], j, positions_matrix, i, TIME_STEPS_NUM);
+            	
+            	 while (!ready_to_move) {
+                    pause();
+                }
             }
 
             close(fd[i][1]);  // close write

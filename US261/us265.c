@@ -27,13 +27,13 @@ void report_generator(Position ***position_Matrix, int num_Drones, int time_Step
 
 
     fprintf(relatorio, "\n======= COLISÕES DETETADAS =======\n");
-
+    
     char line[256];
     while (fgets(line, sizeof(line), file) != NULL) {
             fputs(line, relatorio);
     }
 
-    fprintf(relatorio, "Numero total de drones: %d\n", num_Drones);
+    fprintf(relatorio, "\nNumero total de drones: %d\n\n", num_Drones);
 
     for(int i = 0; i < num_Drones; i++){
         fprintf(relatorio, "=======Drone %d=======\n", i);

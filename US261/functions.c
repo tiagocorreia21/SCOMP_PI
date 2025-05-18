@@ -8,12 +8,11 @@
 #include <string.h>
 #include <time.h>
 
-#define SPACE_X 100
-#define SPACE_Y 100
-#define SPACE_Z 100
-#define TIME_STEPS_NUM 5
-#define DRONE_NUM 10
-#define INVALID_POSITION -999
+#define SPACE_X 1000
+#define SPACE_Y 1000
+#define SPACE_Z 1000
+#define TIME_STEPS_NUM 2
+#define INVALID_POSITION -1
 
 shared_data_type *allocate_shared_memory(char *shm_name) {
 
@@ -52,6 +51,7 @@ void deallocate_shared_memory(char *shm_name, shared_data_type *shared_data) {
 }
 
 Position get_position_3d(Position*** matrix, int drone_id, int time_step, int num_drones, int time_steps_num) {
+
     if (drone_id < 0 || drone_id >= num_drones || time_step < 0 || time_step >= time_steps_num) {
 
          fprintf(stderr, "Error: Attempted to get position out of matrix bounds (drone %d, time %d).\n", drone_id, time_step);
@@ -92,30 +92,37 @@ Position get_position(Position *positions_ptr, int drone_id, int time_step) {
 
 Position generate_position(Position ***position_matrix, int drone_id, int time_step) {
 
-    Position last_position = get_position_3d(position_matrix, drone_id, time_step - 1, DRONE_NUM, TIME_STEPS_NUM);
-
-	srand(time(NULL) + drone_id + time_step);
-
-	int dx = (rand() % SPACE_X);
-    int dy = (rand() % SPACE_Y);
-    int dz = (rand() % SPACE_Z);
-
 	Position next_position;
-    next_position.x = last_position.x + dx;
-    next_position.y = last_position.y + dy;
-    next_position.z = last_position.z + dz;
+	
+	if(time_step == 0){
+		next_position.x = 0;
+        next_position.y = 0;
+        next_position.z = 0;
+	} else {
+		
+		Position last_position = get_position_3d(position_matrix, drone_id, time_step - 1, DRONE_NUM, TIME_STEPS_NUM);
 
+		srand(time(NULL) + getpid() + time_step); // garantir aleatoriedade por processo
+
+        int dx = (rand() % 3) - 1;
+        int dy = (rand() % 3) - 1;
+        int dz = (rand() % 3) - 1;
+
+        next_position.x = last_position.x + dx;
+        next_position.y = last_position.y + dy;
+        next_position.z = last_position.z + dz;
+	}
+	
+	next_position.time_step = time_step;
     return next_position;
 }
 
 void run_drone_script(int write_fd, int time_step, Position ***position_matrix, int drone_id, int time_steps) {
 
-    for (int i = 0; i < time_steps; i++) {
 
         printf("Drone %d: Generating position for time step %d\n", drone_id, time_step);
 
         Position new_position = generate_position(position_matrix, drone_id, time_step);
-
         new_position.pid = getpid();
         new_position.drone_id = drone_id;
 
@@ -126,7 +133,7 @@ void run_drone_script(int write_fd, int time_step, Position ***position_matrix, 
            	exit(EXIT_FAILURE);
         }
         printf("Drone %d: Position written to pipe\n", drone_id);
-    }
+    
     printf("\n");
 }
 
@@ -296,7 +303,6 @@ void initialize_drone_positions(Position ***positions_matrix, int time_step_num,
             positions_matrix[t][d]->y = 0;
             positions_matrix[t][d]->z = 0;
             positions_matrix[t][d]->time_step = t;
-            positions_matrix[t][d]->drone_id = d;
         }
     }
 }
