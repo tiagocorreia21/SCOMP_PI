@@ -68,8 +68,24 @@ void setup_sicont() {
     sigaction(SIGCONT, &act2, NULL);
 }
 
+int count_existing_log_lines(const char *filename) {
+    FILE *file = fopen(filename, "r");
+    if (!file) return 0;
+
+    int count = 0;
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        count++;
+    }
+
+    fclose(file);
+    return count;
+}
+
+
 int main() {
 	
+	int start_log_line_count = count_existing_log_lines("collitions_logs.txt");
 
     ready_to_move = 1;
 
@@ -125,7 +141,7 @@ int main() {
                
                 ready_to_move = 0; // reset
 
-            	run_drone_script(fd[i][1], j, positions_matrix, i, TIME_STEPS_NUM);
+            	run_drone_script(fd[i][1], j, positions_matrix, i, TIME_STEPS_NUM, start_log_line_count);
             	
             	 while (!ready_to_move) {
                     pause();
@@ -174,3 +190,4 @@ int main() {
 
 	return 0;
 }
+
