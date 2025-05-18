@@ -8,11 +8,11 @@
 #include <string.h>
 #include <time.h>
 
-#define SPACE_X 1000
-#define SPACE_Y 1000
-#define SPACE_Z 1000
+#define SPACE_X 100
+#define SPACE_Y 100
+#define SPACE_Z 100
 #define TIME_STEPS_NUM 5
-#define DRONE_NUM 50
+#define DRONE_NUM 10
 #define INVALID_POSITION -999
 
 shared_data_type *allocate_shared_memory(char *shm_name) {
