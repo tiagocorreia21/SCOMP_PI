@@ -7,7 +7,6 @@
 #include "structs.h"
 #include "functions.h"
 
-
 void report_generator(Position ***position_Matrix, int num_Drones, int time_Steps) {
 
 	FILE *file = fopen("collitions_logs.txt", "r");

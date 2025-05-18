@@ -8,11 +8,11 @@
 #include <string.h>
 #include <time.h>
 
-#define SPACE_X 1000
-#define SPACE_Y 1000
-#define SPACE_Z 1000
-#define TIME_STEPS_NUM 2
-#define DRONE_NUM 5
+#define SPACE_X 100
+#define SPACE_Y 100
+#define SPACE_Z 100
+#define TIME_STEPS_NUM 5
+#define DRONE_NUM 10
 #define INVALID_POSITION -999
 
 shared_data_type *allocate_shared_memory(char *shm_name) {
@@ -96,9 +96,9 @@ Position generate_position(Position ***position_matrix, int drone_id, int time_s
 
 	srand(time(NULL) + drone_id + time_step);
 
-	int dx = (rand() % 3) - 1;
-    int dy = (rand() % 3) - 1;
-    int dz = (rand() % 3) - 1;
+	int dx = (rand() % SPACE_X);
+    int dy = (rand() % SPACE_Y);
+    int dz = (rand() % SPACE_Z);
 
 	Position next_position;
     next_position.x = last_position.x + dx;

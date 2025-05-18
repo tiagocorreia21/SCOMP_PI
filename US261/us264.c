@@ -8,27 +8,27 @@
 #include "us263.h"
 
 void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps, shared_data_type shared_data, int max_collition_num) {
-    //cast do ponteiro para matriz positions[drone_count][time_steps]
+
     Position ***drone_positions_matrix = positions_ptr;
 
     for (int t = 0; t < time_steps; t++) {
 
         printf("\n===== TIME STEP %d =====\n", t);
 
-        //US264 – desbloquear os drones com SIGCONT
+        //US264
         for (int i = 0; i < drone_count; i++) {
-            printf("Parent: Sending SIGCONT to drone %d (PID %d)\n", i, pids[i]);
+            //printf("Parent: Sending SIGCONT to drone %d (PID %d)\n", i, pids[i]);
             kill(pids[i], SIGCONT);
             sleep(1);
         }
 
-        // US262 – receber e armazenar posições
+        // US262
         for (int i = 0; i < drone_count; i++) {
 
             Position pos;
 
             capture_drone_movement(fd[i][0], &pos);
-            printf("Parent: Received position from drone %d: (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
+            //printf("Parent: Received position from drone %d: (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
 
             int drone_id = pos.drone_id;
 
@@ -37,6 +37,8 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
             if (collition_result == 1) {
 
                 shared_data.child_collitions[drone_id]++;
+
+                kill(pos.pid, SIGUSR1);
 
                 if (shared_data.child_collitions[drone_id] >= max_collition_num) {
                     kill(pos.pid, SIGINT);

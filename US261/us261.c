@@ -9,9 +9,9 @@
 #include <sys/mman.h>
 #include "us264.h"
 
-#define TIME_STEPS_NUM 2
-#define MAX_COLLISION_NUM 5
-#define DRONE_NUM 5
+#define TIME_STEPS_NUM 5
+#define MAX_COLLISION_NUM 2
+#define DRONE_NUM 10
 
 //sig_atomic_t for signals not to interrupt the normal order of program
 volatile sig_atomic_t ready_to_move;
