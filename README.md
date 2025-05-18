@@ -90,14 +90,14 @@
 - The implementation modifies the default behavior of the SIGUSR1 signal, defining a custom handler and blocking other 
   signals while the handler is executed. The system also restarts any interrupted system calls.
 
-- To allow early termination upon exceeding a predefined threshold of collitions, we decided to use a control variable 
-   which stores the number of collitions in each drone.
+- To allow early termination upon exceeding a predefined threshold of collitions, we decided to use an array on shared
+  memory to store the collision number of each drone process. 
 
-- The system will check this variable and every time a potential collition occurs and terminate if this 
-   value is greater than the defined threshold. The system will also send a termination signal to the drone that exceeded
-    the threshold.
+- Each time a collision occur, the parent process increments  the number of collisions of that specific drone process 
+  and verifies if the threshold is exceeded, and if it is the parent will send the SIGINT signal to the drone. 
 
-- Upon receiving the termination signal, the drones will perform any necessary cleanup and exit. 
+- The drone process upon receiving the SIGINT signal will display a message to the user indicating termination and 
+  it will exit with the exit status 10, indicating collision threshold exceeded.
 
 ---
 ## US264 - Synchronize drone execution with a time step
