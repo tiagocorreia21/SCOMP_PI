@@ -7,7 +7,7 @@
 #include "structs.h"
 #include "functions.h"
 
-void report_generator(Position ***position_Matrix, int num_Drones, int time_Steps, int start_log_line_count) {
+void report_generator(Position ***position_Matrix, int num_Drones, int time_Steps) {
 
 	FILE *file = fopen("collitions_logs.txt", "r");
 
@@ -28,17 +28,11 @@ void report_generator(Position ***position_Matrix, int num_Drones, int time_Step
 
     fprintf(relatorio, "\n======= COLISÕES DETETADAS =======\n");
     
-    char line[256];
-    int line_num = 0;
+    char line[512];
     
-	while (line_num < start_log_line_count && fgets(line, sizeof(line), file) != NULL) {
-		line_num++;
-	}	
-
-	// Agora copiar só as linhas a partir daqui
-	while (fgets(line, sizeof(line), file) != NULL) {
-		fputs(line, relatorio);
-	}
+    while (fgets(line, sizeof(line), file) != NULL) {
+        fputs(line, relatorio);
+    }
 
     fprintf(relatorio, "\nNumero total de drones: %d\n\n", num_Drones);
 

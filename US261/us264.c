@@ -7,7 +7,7 @@
 #include "us265.h"
 #include "us263.h"
 
-void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps, shared_data_type shared_data, int max_collition_num, int start_log_line_count) {
+void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int drone_count, int time_steps, shared_data_type shared_data, int max_collition_num) {
 
     Position ***drone_positions_matrix = positions_ptr;
 
@@ -64,5 +64,5 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
     }
 
     //Chamar US265
-	report_generator(positions_ptr, drone_count, time_steps, start_log_line_count);
+	report_generator(positions_ptr, drone_count, time_steps);
 }
