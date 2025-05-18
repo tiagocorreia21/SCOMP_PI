@@ -128,7 +128,6 @@ void run_drone_script(int write_fd, int time_step, Position ***position_matrix, 
         }
         //printf("Drone %d: Position written to pipe\n", drone_id);
     }
-    printf("\n");
 }
 
 Position*** allocate_position_matrix(int num_drones, int time_steps) {
