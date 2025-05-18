@@ -126,6 +126,25 @@ time steps so that I can accurately simulate real-world execution.
 - Then the us263 to detect and prevent collisions
 ---
 
-## US265
+## US265 - Generate a simulation report
+
+### Description
+
+- I want to receive a summary of the simulation results
+So that I can determine if the figure is safe to use.
+
+### Acceptance Criteria
+
+- The system must generate a report and store it in a file.
+- The report should include the total number of drones and their execution status.
+- If collisions occur, the report must list timestamps and positions.
+- The report should indicate whether the figure passed or failed
+validation.
+
+### Decisions
+
+- The report data of the colisions is fetched in the colisions.txt, from the us263.
+- The data of the movements of the drones is fetched from the struct created to save them.
+- It creates a txt file with the date and time to make each report unique and easier to differentiate.
 
 ---
