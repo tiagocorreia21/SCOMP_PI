@@ -9,7 +9,7 @@
 #include <sys/mman.h>
 #include "us264.h"
 
-#define TIME_STEPS_NUM 5
+#define TIME_STEPS_NUM 4
 #define MAX_COLLISION_NUM 2
 #define DRONE_NUM 10
 
@@ -70,6 +70,14 @@ void setup_sigcont() {
 
 int main() {
 	
+	FILE *file = fopen("collitions_logs.txt", "w");
+    if (file != NULL) {
+        fclose(file);
+    } else {
+        perror("Erro ao limpar o arquivo de logs");
+        exit(1);
+    }
+	
     ready_to_move = 1;
 
     shared_data_type *shared_data = allocate_shared_memory("/shm_child_collitions");
@@ -81,7 +89,7 @@ int main() {
 	// Allocate the 3D matrix for drone positions dynamically
 	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
 
-	initialize_drone_positions(positions_matrix, TIME_STEPS_NUM, DRONE_NUM);
+	//initialize_drone_positions(positions_matrix, TIME_STEPS_NUM, DRONE_NUM);
 
 	if (positions_matrix == NULL) {
         return EXIT_FAILURE;
@@ -115,15 +123,17 @@ int main() {
 			setup_sigusr1();
 			setup_sigcont();
 			setup_sigint();
+			
 
-            for (int j = 1; j < TIME_STEPS_NUM; j++) {
+            for (int j = 0; j < TIME_STEPS_NUM; j++) {
 
                 while (!ready_to_move) {
                     pause();
+                   
                 }
                 ready_to_move = 0; // reset
-
-            	run_drone_script(fd[i][1], j, positions_matrix, i, TIME_STEPS_NUM);
+				run_drone_script(fd[i][1], j, positions_matrix, i, TIME_STEPS_NUM);
+            	
             }
 
             close(fd[i][1]);  // close write

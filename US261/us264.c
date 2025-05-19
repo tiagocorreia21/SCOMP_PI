@@ -29,10 +29,11 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
 
             int drone_id = pos.drone_id;
 
+			
             int collition_result = verify_collisions(positions_ptr, pos, t, drone_count, time_steps);
 
             if (collition_result == 1) {
-
+				
                 shared_data.child_collitions[drone_id]++;
 
                 kill(pos.pid, SIGUSR1);
@@ -43,7 +44,7 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
             }
 
             // If not the first time step, validate the movement
-            if (t > 0) {
+            /*if (t > 0) {
 
                 Position current_pos = get_position_3d(drone_positions_matrix, i, t-1, drone_count, time_steps);
 
@@ -53,10 +54,10 @@ void run_simulation(int pids[], int fd[][2], Position ***positions_ptr, int dron
                     // Use the last valid position
                     pos = current_pos;
                 }
-            }
+            }*/
 
             store_position(drone_positions_matrix, i, t, pos);
-            //printf("Drone %d @ (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
+            
         }
 
         // Print current positions for all drones

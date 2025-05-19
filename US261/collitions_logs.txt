@@ -1,15 +1,1 @@
-Collision detected between generated position and drone 7 at time step 0
-Collision detected between generated position and drone 41 at time step 0
-Collision detected between generated position and drone 13 at time step 0
-Collision detected between generated position and drone 7 at time step 1
-Collision detected between generated position and drone 41 at time step 1
-Collision detected between generated position and drone 13 at time step 1
-Collision detected between generated position and drone 7 at time step 2
-Collision detected between generated position and drone 41 at time step 2
-Collision detected between generated position and drone 13 at time step 2
-Collision detected between generated position and drone 7 at time step 3
-Collision detected between generated position and drone 41 at time step 3
-Collision detected between generated position and drone 13 at time step 3
-Collision detected between generated position and drone 7 at time step 4
-Collision detected between generated position and drone 41 at time step 4
-Collision detected between generated position and drone 13 at time step 4
+Collision detected between generated position and drone 2 at time step 0

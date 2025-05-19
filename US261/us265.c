@@ -10,7 +10,8 @@
 void report_generator(Position ***position_Matrix, int num_Drones, int time_Steps) {
 
 	FILE *file = fopen("collitions_logs.txt", "r");
-
+	
+	
     char filename[64];
     time_t now = time(NULL);
     struct tm *t = localtime(&now);
@@ -35,6 +36,7 @@ void report_generator(Position ***position_Matrix, int num_Drones, int time_Step
     }
 
     fprintf(relatorio, "\nNumero total de drones: %d\n\n", num_Drones);
+    fprintf(relatorio, "Numero total de time steps: %d\n", time_Steps);
 
     for(int i = 0; i < num_Drones; i++){
         fprintf(relatorio, "=======Drone %d=======\n", i);

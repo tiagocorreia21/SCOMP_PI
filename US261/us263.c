@@ -20,7 +20,7 @@ int verify_collisions(Position ***position_matrix, Position generated_position, 
 
 		Position pos = get_position_3d(position_matrix, i, time_step, drone_num, time_steps_num);
 
-		if (pos.x == generated_position.x || pos.y == generated_position.y || pos.z == generated_position.z) {
+		if (pos.x == generated_position.x && pos.y == generated_position.y && pos.z == generated_position.z) {
 
             FILE *file = fopen("collitions_logs.txt", "a");
 
