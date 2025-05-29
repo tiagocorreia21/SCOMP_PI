@@ -1,7 +1,7 @@
-main: main.o functions.o
-	gcc main.o functions.o -z noexecstack -o main -lrt -lpthread
+main: main.o functions.o thread_functions.o
+	gcc main.o functions.o thread_functions.o -z noexecstack -o main -lrt -lpthread
 
-main.o: main.c functions.h structs.h
+main.o: main.c functions.h structs.h thread_functions.h
 	gcc -g -Wall -Wextra -fanalyzer -c main.c -o main.o -lrt -lpthread
 
 run: main

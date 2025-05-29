@@ -7,10 +7,12 @@
 #include "structs.h"
 #include "functions.h"
 #include <sys/mman.h>
+#include "thread_functions.h"
 
 #define TIME_STEPS_NUM 4
 #define MAX_COLLISION_NUM 2
-#define DRONE_NUM 10
+#define DRONE_NUM 2
+#define THREAD_NUM 2
 
 int main() {
 
@@ -19,6 +21,10 @@ int main() {
 	if (positions_matrix == NULL) {
         return EXIT_FAILURE;
     }
+
+    pthread_t thread_ids[THREAD_NUM];
+
+    create_threads(thread_ids);
 
 	int p[DRONE_NUM]; //PIDs
 
@@ -60,6 +66,11 @@ int main() {
        	}
     }
     printf("============================================\n\n");
+
+    //wait for all threads to finish
+    for (int i = 0; i < THREAD_NUM; i++) {
+        pthread_join(thread_ids[i], NULL);
+    }
 
 	printf("Simulation finished with success...\n");
 
