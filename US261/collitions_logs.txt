@@ -1,1 +1,0 @@
-Collision detected between generated position and drone 2 at time step 0

@@ -2,3 +2,13 @@
 *.o
 *.txt
 collitions_logs.txt
+*.dll
+*.so
+*.a
+*.exe
+*.bin
+
+### INTELLIJ IDEA
+.idea
+*.iml
+out/
