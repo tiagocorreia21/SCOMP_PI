@@ -8,6 +8,7 @@
 #include "functions.h"
 #include <sys/mman.h>
 #include "thread_functions.h"
+#include <pthread.h>
 
 #define TIME_STEPS_NUM 4
 #define MAX_COLLISION_NUM 2
@@ -16,10 +17,11 @@
 
 int main() {
 
-	Position*** positions_matrix = allocate_position_matrix(DRONE_NUM, TIME_STEPS_NUM);
+	Position* matrix = allocate_shared_position_matrix(DRONE_NUM, TIME_STEPS_NUM, "/matrix_shared_data");
 
-	if (positions_matrix == NULL) {
-        return EXIT_FAILURE;
+	if (matrix == NULL) {
+	    perror("matrix allocation failed");
+        exit(10);
     }
 
     pthread_t thread_ids[THREAD_NUM];
@@ -34,17 +36,15 @@ int main() {
 
 		if (p[i] == -1) {
 			perror("Fork Failed");
-			exit(1);
+			exit(11);
 		}
 
 		if (p[i] == 0) {
 
 			// child/drone process
-
-            for (int j = 0; j < TIME_STEPS_NUM; j++) {
-				run_drone_script(j, positions_matrix, i, TIME_STEPS_NUM);
-            }
-
+            /*for (int j = 0; j < TIME_STEPS_NUM; j++) {
+				run_drone_script(j, matrix, i, TIME_STEPS_NUM);
+            }*/
             exit(0);
 		}
 	}
@@ -71,6 +71,8 @@ int main() {
     for (int i = 0; i < THREAD_NUM; i++) {
         pthread_join(thread_ids[i], NULL);
     }
+
+    //free_position_matrix(matrix, "/matrix_shared_data");
 
 	printf("Simulation finished with success...\n");
 

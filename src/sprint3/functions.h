@@ -3,20 +3,16 @@
 
 #include "structs.h"
 
-void capture_drone_movement(int fd, Position *pos);
+void run_drone_script(int time_step, Position *matrix, int drone_id);
 
-void store_position(Position ***positions_ptr, int drone_id, int time_step, Position pos);
+Position* allocate_shared_position_matrix(int num_drones, int time_steps, char shm_name[]);
 
-void print_positions(Position ***positions_ptr, int drone_count, int time_step);
+void free_position_matrix(Position *matrix, char shm_name[], int drone_num, int time_step_num);
 
-void run_drone_script(int time_step_num, Position ***position_matrix, int drone_id, int time_steps);
+void store_position(Position *matrix ,int drone_id, int time_step, int drone_num, Position new_pos);
 
-void initialize_drone_positions(Position ***positions_matrix, int time_step_num, int drone_num);
+Position get_position(Position* matrix, int drone_id, int time_step, int drone_num);
 
-Position*** allocate_position_matrix(int num_drones, int time_steps);
-
-void free_position_matrix(Position*** matrix, int num_drones, int time_steps);
-
-Position generate_position(Position ***position_matrix, int drone_id, int time_step);
+void print_positions(Position *matrix, int drone_num, int time_step);
 
 #endif
