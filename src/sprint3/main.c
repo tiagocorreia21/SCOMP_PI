@@ -4,16 +4,22 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
+#include <semaphore.h>
+#include <pthread.h>
+#include <fcntl.h>
+#include "thread_functions.h"
 #include "structs.h"
 #include "functions.h"
-#include <sys/mman.h>
-#include "thread_functions.h"
-#include <pthread.h>
+#include "us364.h"
 
 #define TIME_STEPS_NUM 4
 #define MAX_COLLISION_NUM 2
-#define DRONE_NUM 2
+#define DRONE_NUM 5
 #define THREAD_NUM 2
+
+sem_t* step_semaphores[DRONE_NUM];
+sem_t* main_semaphore;
 
 int main() {
 
@@ -24,12 +30,30 @@ int main() {
         exit(10);
     }
 
+	for (int i = 0; i < DRONE_NUM; i++) {
+		char sem_name[64];
+		snprintf(sem_name, sizeof(sem_name), "/step_semaphore_%d", i);
+		sem_unlink(sem_name); // Remove caso já exista
+		step_semaphores[i] = sem_open(sem_name, O_CREAT | O_EXCL, 0644, 0);
+		if (step_semaphores[i] == SEM_FAILED) {
+			perror("sem_open step_semaphore failed");
+			exit(1);
+		}
+	}
+
+	sem_unlink("/main_semaphore");
+	main_semaphore = sem_open("/main_semaphore", O_CREAT | O_EXCL, 0644, 0);
+	if (main_semaphore == SEM_FAILED) {
+		perror("sem_open main_semaphore failed");
+		exit(1);
+	}
     pthread_t thread_ids[THREAD_NUM];
 
     create_threads(thread_ids);
 
 	int p[DRONE_NUM]; //PIDs
-
+	
+	
 	for (int i = 0; i < DRONE_NUM; i++) {
 
 		p[i] = fork();
@@ -42,17 +66,23 @@ int main() {
 		if (p[i] == 0) {
 
 			// child/drone process
-            /*for (int j = 0; j < TIME_STEPS_NUM; j++) {
-				run_drone_script(j, matrix, i, TIME_STEPS_NUM);
-            }*/
+            for (int j = 0; j < TIME_STEPS_NUM; j++) {
+				sem_wait(step_semaphores[i]); 
+				
+				run_drone_script(j, matrix, i, MAX_COLLISION_NUM);
+				
+				sem_post(main_semaphore);
+            }
             exit(0);
 		}
 	}
+	
+	simulation(matrix, TIME_STEPS_NUM, DRONE_NUM, MAX_COLLISION_NUM);
 
 	//=================================================================================================================
 
 	//Parent Process
-
+	
     // wait for all the child process to finish
     printf("Waiting for drone processes to finish...\n\n");
     for (int i = 0; i < DRONE_NUM; i++) {
@@ -66,11 +96,22 @@ int main() {
        	}
     }
     printf("============================================\n\n");
-
+    
+    
+	for (int i = 0; i < DRONE_NUM; i++) {
+		sem_close(step_semaphores[i]);
+		char sem_name[64];
+		snprintf(sem_name, sizeof(sem_name), "/step_semaphore_%d", i);
+		sem_unlink(sem_name);
+	}
+	sem_close(main_semaphore);
+	sem_unlink("/main_semaphore");
+    
     //wait for all threads to finish
     for (int i = 0; i < THREAD_NUM; i++) {
         pthread_join(thread_ids[i], NULL);
     }
+
 
     //free_position_matrix(matrix, "/matrix_shared_data");
 

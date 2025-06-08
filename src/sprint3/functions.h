@@ -3,7 +3,7 @@
 
 #include "structs.h"
 
-void run_drone_script(int time_step, Position *matrix, int drone_id);
+void run_drone_script(int time_step, Position *matrix, int drone_id, int max_collisions_num);
 
 Position* allocate_shared_position_matrix(int num_drones, int time_steps, char shm_name[]);
 
@@ -14,5 +14,7 @@ void store_position(Position *matrix ,int drone_id, int time_step, int drone_num
 Position get_position(Position* matrix, int drone_id, int time_step, int drone_num);
 
 void print_positions(Position *matrix, int drone_num, int time_step);
+
+Position generate_position(Position *matrix, int time_step, int drone_id);
 
 #endif

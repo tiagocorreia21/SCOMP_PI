@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
+#include <semaphore.h>
 #include <sys/mman.h>
 #include <signal.h>
 #include <string.h>
@@ -13,7 +14,57 @@
 #define SPACE_Z 50
 #define INVALID_POSITION -999
 
-void run_drone_script(int time_step, Position *matrix, int drone_id) {
+
+Position generate_position(Position *matrix, int time_step, int drone_id, int drone_num) {
+	
+	Position last_position;
+	srand(time(NULL) + drone_id + time_step * 100);
+
+   
+    if (time_step == 0) {
+		int dx = rand() % SPACE_X;
+        int dy = rand() % SPACE_Y;
+        int dz = rand() % SPACE_Z;
+
+        matrix[POS_IDX(0, drone_id, drone_num)].x = dx;
+        matrix[POS_IDX(0, drone_id, drone_num)].y = dy;
+        matrix[POS_IDX(0, drone_id, drone_num)].z = dz;
+
+        last_position = matrix[POS_IDX(0, drone_id, drone_num)];
+            
+    } else {
+        last_position = matrix[POS_IDX(time_step - 1, drone_id, drone_num)];
+    }
+
+    int dx = (rand() % 3) - 1; // -1, 0, 1
+    int dy = (rand() % 3) - 1;
+    int dz = (rand() % 3) - 1;
+
+    Position next_position;
+
+    next_position.x = last_position.x + dx;
+    next_position.y = last_position.y + dy;
+    next_position.z = last_position.z + dz;
+    
+
+    // Garantir que está dentro dos limites
+    if (next_position.x < 0) next_position.x = 0;
+    if (next_position.y < 0) next_position.y = 0;
+    if (next_position.z < 0) next_position.z = 0;
+    if (next_position.x >= SPACE_X) next_position.x = SPACE_X - 1;
+    if (next_position.y >= SPACE_Y) next_position.y = SPACE_Y - 1;
+    if (next_position.z >= SPACE_Z) next_position.z = SPACE_Z - 1;
+
+    return next_position;
+	
+}
+
+void run_drone_script(int time_step, Position *matrix, int drone_id, int drone_num) {
+	
+	
+	Position newPosition = generate_position(matrix, time_step, drone_id, drone_num);
+	printf("Posição do drone: %d, %d, %d\n", newPosition.x, newPosition.y, newPosition.z);
+	matrix[POS_IDX(time_step, drone_id, drone_num)] = newPosition;
 
     printf("Drone Script\n");
 }
@@ -81,7 +132,7 @@ void print_positions(Position *matrix, int drone_num, int time_step) {
     printf("\n===== TIME STEP %d =====\n", time_step);
 
     for (int i = 0; i < drone_num; i++) {
-        Position pos = get_position(matrix, i, time_step, drone_num);
+        Position pos = matrix[POS_IDX(time_step, i, drone_num)];
         printf("Drone %d (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
     }
 }
