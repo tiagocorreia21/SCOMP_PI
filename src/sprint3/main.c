@@ -76,7 +76,7 @@ int main() {
 		}
 	}
 	
-	simulation(matrix, TIME_STEPS_NUM, DRONE_NUM);
+	simulation(TIME_STEPS_NUM, DRONE_NUM);
 
 	//=================================================================================================================
 

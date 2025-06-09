@@ -17,4 +17,6 @@ void print_positions(Position *matrix, int drone_num, int time_step);
 
 Position generate_position(Position *matrix, int time_step, int drone_id);
 
+void print_position(Position *matrix, int drone_id, int time_step, int drone_num);
+
 #endif

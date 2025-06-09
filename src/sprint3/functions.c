@@ -14,6 +14,13 @@
 #define SPACE_Z 50
 #define INVALID_POSITION -999
 
+void print_position(Position *matrix, int drone_id, int time_step, int drone_num) {
+
+    Position pos = matrix[POS_IDX(time_step, drone_id, drone_num)];
+
+    printf("Drone %d on time step %d: (%d, %d, %d)\n", drone_id, time_step, pos.x, pos.y, pos.z);
+}
+
 Position generate_position(Position *matrix, int time_step, int drone_id, int drone_num) {
 	
 	Position last_position;
@@ -65,6 +72,8 @@ void run_drone_script(int time_step, Position *matrix, int drone_id, int drone_n
 	printf("Drone PID: (%d) | New Drone Position: (%d, %d, %d)\n", getpid(),new_position.x, new_position.y, new_position.z);
 
 	matrix[POS_IDX(time_step, drone_id, drone_num)] = new_position;
+
+	print_position(matrix, drone_id, time_step, drone_num);
 }
 
 Position* allocate_shared_position_matrix(int num_drones, int time_steps, char shm_name[]) {
@@ -134,4 +143,3 @@ void print_positions(Position *matrix, int drone_num, int time_step) {
         printf("Drone %d (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
     }
 }
-
