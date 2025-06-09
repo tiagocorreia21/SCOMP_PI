@@ -15,4 +15,10 @@ typedef struct {
     int pid;
 } Position;
 
+typedef struct {
+    int drone_num;
+    int time_step_num;
+    Position *matrix;
+} collition_thread_info;
+
 #endif

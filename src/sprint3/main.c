@@ -49,11 +49,10 @@ int main() {
 	}
     pthread_t thread_ids[THREAD_NUM];
 
-    create_threads(thread_ids);
+    create_threads(thread_ids, DRONE_NUM, TIME_STEPS_NUM, matrix);
 
 	int p[DRONE_NUM]; //PIDs
-	
-	
+
 	for (int i = 0; i < DRONE_NUM; i++) {
 
 		p[i] = fork();
@@ -84,7 +83,7 @@ int main() {
 	//Parent Process
 	
     // wait for all the child process to finish
-    printf("Waiting for drone processes to finish...\n\n");
+    printf("\nWaiting for drone processes to finish...\n\n");
     for (int i = 0; i < DRONE_NUM; i++) {
 
      	int status;
