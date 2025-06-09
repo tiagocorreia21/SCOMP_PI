@@ -11,7 +11,7 @@
 extern sem_t* step_semaphores[DRONE_NUM];
 extern sem_t* main_semaphore;
 
-void simulation(Position *matrix, int time_steps, int num_drone, int max_colis_num) {
+void simulation(Position *matrix, int time_steps, int num_drone) {
 	
 	
     for (int t = 0; t < time_steps; t++) {

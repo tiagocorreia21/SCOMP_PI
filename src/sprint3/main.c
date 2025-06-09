@@ -77,7 +77,7 @@ int main() {
 		}
 	}
 	
-	simulation(matrix, TIME_STEPS_NUM, DRONE_NUM, MAX_COLLISION_NUM);
+	simulation(matrix, TIME_STEPS_NUM, DRONE_NUM);
 
 	//=================================================================================================================
 
@@ -112,8 +112,7 @@ int main() {
         pthread_join(thread_ids[i], NULL);
     }
 
-
-    //free_position_matrix(matrix, "/matrix_shared_data");
+    free_position_matrix(matrix, "/matrix_shared_data", DRONE_NUM, TIME_STEPS_NUM);
 
 	printf("Simulation finished with success...\n");
 
