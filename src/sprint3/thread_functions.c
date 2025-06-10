@@ -5,6 +5,10 @@
 #include <unistd.h>
 #include "structs.h"
 
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t cond_collision = PTHREAD_COND_INITIALIZER;
+int collision_detected = 0; // flag para sinalizar colisões
+
 void* collision_detection_func(void *arg) {
 
     write(STDOUT_FILENO, "Collision Thread\n", 18);
@@ -26,8 +30,12 @@ void* collision_detection_func(void *arg) {
                 Position pos_j = matrix[POS_IDX(t, j, total_drones)];
 
                 if (pos_i.x == pos_j.x && pos_i.y == pos_j.y && pos_i.z == pos_j.z) {
-
-                    // TODO : Collition occurred: notify report thread
+                    printf("Collision detected between drone %d and drone %d at time step %d\n", i, j, t);
+                    
+                    pthread_mutex_lock(&mutex);
+                    collision_detected = 1;
+                    pthread_cond_signal(&cond_collision); // sinaliza a thread de relatório
+                    pthread_mutex_unlock(&mutex);
                 }
 
             }
@@ -37,8 +45,22 @@ void* collision_detection_func(void *arg) {
 }
 
 void* report_func(void *arg) {
-
     write(STDOUT_FILENO, "Report Thread\n", 14);
+
+    while (1)
+    {
+        pthread_mutex_lock(&mutex);
+
+        while (!collision_detected) {
+            pthread_cond_wait(&cond_collision, &mutex);
+        }
+        //printf("REPORT\n");
+
+        collision_detected = 0; 
+        pthread_mutex_unlock(&mutex);
+           
+    }
+
 
     pthread_exit(NULL);
 }
