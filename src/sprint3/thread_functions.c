@@ -8,6 +8,7 @@
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 pthread_cond_t cond_collision = PTHREAD_COND_INITIALIZER;
 int collision_detected = 0; // flag para sinalizar colisões
+int report_running = 1;
 
 void* collision_detection_func(void *arg) {
 
@@ -41,6 +42,12 @@ void* collision_detection_func(void *arg) {
             }
         }
     }
+
+    pthread_mutex_lock(&mutex);
+    report_running = 0;
+    pthread_cond_signal(&cond_collision); // acorda a thread de relatorio para que possa sair caso nao haja colisoes
+    pthread_mutex_unlock(&mutex);
+
     pthread_exit(NULL);
 }
 
@@ -51,9 +58,14 @@ void* report_func(void *arg) {
     {
         pthread_mutex_lock(&mutex);
 
-        while (!collision_detected) {
+        while (!collision_detected && report_running) {
             pthread_cond_wait(&cond_collision, &mutex);
         }
+        if (!report_running && !collision_detected) {
+            pthread_mutex_unlock(&mutex);
+            break;
+        }
+
         //printf("REPORT\n");
 
         collision_detected = 0; 

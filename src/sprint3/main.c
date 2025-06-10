@@ -78,10 +78,6 @@ int main() {
 	
 	simulation(TIME_STEPS_NUM, DRONE_NUM);
 
-	pthread_join(thread_ids[0], NULL); // Aguarda thread de colisao
-    pthread_cancel(thread_ids[1]);    // Termina thread de relatorio
-    pthread_join(thread_ids[1], NULL); // Aguarda termino da thread
-
 	//=================================================================================================================
 
 	//Parent Process
