@@ -5,7 +5,7 @@
 #include "structs.h"
 #include "functions.h"
 
-#define DRONE_NUM 5
+#define DRONE_NUM 10
 
 extern sem_t* step_semaphores[DRONE_NUM];
 extern sem_t* main_semaphore;

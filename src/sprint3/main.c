@@ -13,9 +13,9 @@
 #include "functions.h"
 #include "us364.h"
 
-#define TIME_STEPS_NUM 4
+#define TIME_STEPS_NUM 5
 #define MAX_COLLISION_NUM 2
-#define DRONE_NUM 5
+#define DRONE_NUM 10
 #define THREAD_NUM 2
 
 sem_t* step_semaphores[DRONE_NUM];

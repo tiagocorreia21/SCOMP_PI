@@ -69,7 +69,7 @@ void run_drone_script(int time_step, Position *matrix, int drone_id, int drone_n
 
 	Position new_position = generate_position(matrix, time_step, drone_id, drone_num);
 
-	printf("Drone PID: (%d) | New Drone Position: (%d, %d, %d)\n", getpid(),new_position.x, new_position.y, new_position.z);
+	//printf("Drone PID: (%d) | New Drone Position: (%d, %d, %d)\n", getpid(),new_position.x, new_position.y, new_position.z);
 
 	matrix[POS_IDX(time_step, drone_id, drone_num)] = new_position;
 
@@ -120,26 +120,9 @@ void free_position_matrix(Position *matrix, char shm_name[], int drone_num, int 
     }
 }
 
-void store_position(Position *matrix ,int drone_id, int time_step, int drone_num, Position new_pos) {
-
-    int idx = POS_IDX(time_step, drone_id, drone_num);
-
-    matrix[idx] = new_pos;
-}
-
 Position get_position(Position* matrix, int drone_id, int time_step, int drone_num) {
 
     int idx = POS_IDX(time_step, drone_id, drone_num);
 
     return matrix[idx];
-}
-
-void print_positions(Position *matrix, int drone_num, int time_step) {
-
-    printf("\n===== TIME STEP %d =====\n", time_step);
-
-    for (int i = 0; i < drone_num; i++) {
-        Position pos = matrix[POS_IDX(time_step, i, drone_num)];
-        printf("Drone %d (%d, %d, %d)\n", i, pos.x, pos.y, pos.z);
-    }
 }
