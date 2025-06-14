@@ -1,96 +1,144 @@
-#include <stddef.h>
 #include <pthread.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 #include "structs.h"
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-pthread_cond_t cond_collision = PTHREAD_COND_INITIALIZER;
-int collision_detected = 0; // flag para sinalizar colisões
-int report_running = 1;
+/* -------------------------------------------------------------
+ * globals shared by both worker threads
+ * ----------------------------------------------------------- */
+#define MAX_COLLISIONS 1024
 
-void* collision_detection_func(void *arg) {
+static CollisionEvent collisions[MAX_COLLISIONS];
+static int            collision_cnt      = 0;
 
-    write(STDOUT_FILENO, "Collision Thread\n", 18);
+static pthread_mutex_t mtx              = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t  cv_work_available = PTHREAD_COND_INITIALIZER;
+static int             work_left         = 1;   // 0 ⇒ simulation over
 
-    collition_thread_info info = *((collition_thread_info*) arg);
+/* -------------------------------------------------------------
+ * collision-detection thread
+ * ----------------------------------------------------------- */
+static void *collision_thread(void *arg) {
+    ThreadCfg cfg = *((ThreadCfg *)arg);
+    free(arg);                         // cfg is now a local copy
 
-    int total_time_steps = info.time_step_num;
-    int total_drones = info.drone_num;
-    Position *matrix = info.matrix;
+    write(STDOUT_FILENO, "Collision Thread\n", 17);
 
-    for (int t = 0; t < total_time_steps; t++) {
+    for (int t = 0; t < cfg.steps; ++t) {
+        for (int i = 0; i < cfg.drones; ++i) {
+            Position pi = cfg.matrix[POS_IDX(t, i, cfg.drones)];
 
-        for (int i = 0; i < total_drones; i++) {
+            for (int j = i + 1; j < cfg.drones; ++j) {
+                Position pj = cfg.matrix[POS_IDX(t, j, cfg.drones)];
 
-            Position pos_i = matrix[POS_IDX(t, i, total_drones)];
+                if (pi.x == pj.x && pi.y == pj.y && pi.z == pj.z) {
+                    printf("Collision: D%d & D%d at t=%d (%d,%d,%d)\n",
+                           i, j, t, pi.x, pi.y, pi.z);
 
-            for (int j = i + 1; j < total_drones; j++) {
-
-                Position pos_j = matrix[POS_IDX(t, j, total_drones)];
-
-                if (pos_i.x == pos_j.x && pos_i.y == pos_j.y && pos_i.z == pos_j.z) {
-                    printf("Collision detected between drone %d and drone %d at time step %d\n", i, j, t);
-                    
-                    pthread_mutex_lock(&mutex);
-                    collision_detected = 1;
-                    pthread_cond_signal(&cond_collision); // sinaliza a thread de relatório
-                    pthread_mutex_unlock(&mutex);
+                    pthread_mutex_lock(&mtx);
+                    if (collision_cnt < MAX_COLLISIONS) {
+                        collisions[collision_cnt++] =
+                            (CollisionEvent){i, j, t, pi};
+                    }
+                    pthread_cond_signal(&cv_work_available);
+                    pthread_mutex_unlock(&mtx);
                 }
-
             }
         }
     }
 
-    pthread_mutex_lock(&mutex);
-    report_running = 0;
-    pthread_cond_signal(&cond_collision); // acorda a thread de relatorio para que possa sair caso nao haja colisoes
-    pthread_mutex_unlock(&mutex);
+    /* no more work -> tell report thread it can finish */
+    pthread_mutex_lock(&mtx);
+    work_left = 0;
+    pthread_cond_signal(&cv_work_available);
+    pthread_mutex_unlock(&mtx);
 
-    pthread_exit(NULL);
+    return NULL;
 }
 
-void* report_func(void *arg) {
+/* -------------------------------------------------------------
+ * report thread
+ * ----------------------------------------------------------- */
+static int cfg_total_drones = 0;
+static int cfg_total_steps  = 0;
+
+static void *report_thread(void *arg) {
+    (void)arg;
     write(STDOUT_FILENO, "Report Thread\n", 14);
 
-    while (1)
-    {
-        pthread_mutex_lock(&mutex);
-
-        while (!collision_detected && report_running) {
-            pthread_cond_wait(&cond_collision, &mutex);
-        }
-        if (!report_running && !collision_detected) {
-            pthread_mutex_unlock(&mutex);
-            break;
-        }
-
-        //printf("REPORT\n");
-
-        collision_detected = 0; 
-        pthread_mutex_unlock(&mutex);
-           
+    /* wait until collision_thread says there is nothing left to do */
+    pthread_mutex_lock(&mtx);
+    while (work_left || collision_cnt == 0) {
+        if (!work_left) break;  // finished & no collisions – we can exit
+        pthread_cond_wait(&cv_work_available, &mtx);
     }
 
+    /* build the final report ---------------------------------- */
+    time_t rawtime;
+    struct tm *timeinfo;
+    char timestamp[80];
+    char filename[100];
 
-    pthread_exit(NULL);
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(timestamp, sizeof(timestamp), "%Y-%m-%d_%H-%M-%S", timeinfo);
+    snprintf(filename, sizeof(filename), "simulation_report_%s.txt", timestamp);
+    
+    FILE *report_file = fopen(filename, "w");
+    if (!report_file) {
+        perror("Failed to create report file");
+        return NULL;
+    }
+
+    
+
+    fprintf(report_file, "=== SIMULATION REPORT ===\n");
+    fprintf(report_file, "Total drones        : %d\n", cfg_total_drones);
+    fprintf(report_file, "Total time steps    : %d\n", cfg_total_steps);
+    fprintf(report_file, "Collisions detected : %d\n\n", collision_cnt);
+
+    for (int k = 0; k < collision_cnt; ++k) {
+        CollisionEvent c = collisions[k];
+        fprintf(report_file,
+                "Collision %2d | drones %d & %d | t=%d "
+                "| (%d,%d,%d)\n",
+                k + 1, c.drone1, c.drone2, c.time_step,
+                c.pos.x, c.pos.y, c.pos.z);
+    }
+
+    fprintf(report_file, "\nValidation result : %s\n",
+            collision_cnt ? "FAIL" : "PASS");
+    fclose(report_file);
+
+    puts("Final report written to simulation_report.txt");
+
+    pthread_mutex_unlock(&mtx);
+    return NULL;
 }
 
-void create_threads(pthread_t thread_ids[], int drone_num, int time_step_num, Position *matrix) {
+/* -------------------------------------------------------------
+ * helper to start both threads (called from main)
+ * ----------------------------------------------------------- */
+void create_threads(pthread_t tid[2], int drones, int steps,
+                    Position *matrix) {
+    ThreadCfg *cfg = malloc(sizeof(ThreadCfg));
+    *cfg           = (ThreadCfg){drones, steps, matrix};
 
-    collition_thread_info info;
-    info.drone_num = drone_num;
-    info.time_step_num = time_step_num;
-    info.matrix = matrix;
+    cfg_total_drones = drones;
+    cfg_total_steps  = steps;
 
-    if ((pthread_create(&thread_ids[0], NULL, collision_detection_func, (void*) &info) != 0)) {
-        perror("pthread_create failed");
-        exit(2);
+    if (pthread_create(&tid[0], NULL, collision_thread, cfg) != 0 ||
+        pthread_create(&tid[1], NULL, report_thread,   NULL) != 0) {
+        perror("pthread_create");
+        exit(EXIT_FAILURE);
     }
+}
 
-    if ((pthread_create(&thread_ids[1], NULL, report_func, NULL) != 0)) {
-        perror("pthread_create failed");
-        exit(3);
-    }
+void simulation_finished(void) {
+    pthread_mutex_lock(&mtx);
+    work_left = 0;
+    pthread_cond_broadcast(&cv_work_available);
+    pthread_mutex_unlock(&mtx);
 }

@@ -49,7 +49,7 @@ int main() {
 	}
     pthread_t thread_ids[THREAD_NUM];
 
-    create_threads(thread_ids, DRONE_NUM, TIME_STEPS_NUM, matrix);
+    //create_threads(thread_ids, DRONE_NUM, TIME_STEPS_NUM, matrix);
 
 	int p[DRONE_NUM]; //PIDs
 
@@ -78,6 +78,12 @@ int main() {
 	
 	simulation(TIME_STEPS_NUM, DRONE_NUM);
 
+	//pthread_t thread_ids[THREAD_NUM];
+	create_threads(thread_ids, DRONE_NUM, TIME_STEPS_NUM, matrix);
+
+	simulation_finished();                       // let the reporter exit
+	for (int i = 0; i < 2; ++i) pthread_join(thread_ids[i], NULL);
+
 	//=================================================================================================================
 
 	//Parent Process
@@ -95,6 +101,11 @@ int main() {
        	}
     }
     printf("============================================\n\n");
+
+	// simulation_finished();
+
+	// for (int i = 0; i < THREAD_NUM; ++i)
+	// 	pthread_join(thread_ids[i], NULL);
     
     
 	for (int i = 0; i < DRONE_NUM; i++) {
