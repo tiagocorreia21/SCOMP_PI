@@ -21,6 +21,8 @@
 sem_t* step_semaphores[DRONE_NUM];
 sem_t* main_semaphore;
 
+void run_drone_script(int time_step, Position *matrix, int drone_id, int drone_num);
+
 int main() {
 
 	Position* matrix = allocate_shared_position_matrix(DRONE_NUM, TIME_STEPS_NUM, "/matrix_shared_data");
@@ -68,7 +70,7 @@ int main() {
             for (int j = 0; j < TIME_STEPS_NUM; j++) {
 				sem_wait(step_semaphores[i]); 
 				
-				run_drone_script(j, matrix, i, MAX_COLLISION_NUM);
+				run_drone_script(j, matrix, i, DRONE_NUM); // <-- FIXED HERE
 				
 				sem_post(main_semaphore);
             }
