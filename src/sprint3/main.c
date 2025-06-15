@@ -80,9 +80,7 @@ int main() {
 
 	create_threads(thread_ids, DRONE_NUM, TIME_STEPS_NUM, matrix);
 
-	simulation_finished();                       // let the reporter exit
-
-	for (int i = 0; i < 2; ++i) pthread_join(thread_ids[i], NULL); // Wait for the threads to finish
+	simulation_finished();
 
 	//=================================================================================================================
 

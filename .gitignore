@@ -1,7 +1,7 @@
 ### Ignore Compilation files ###
 *.o
 *.txt
-collitions_logs.txt
+
 *.dll
 *.so
 *.a
@@ -13,3 +13,8 @@ collitions_logs.txt
 .idea
 *.iml
 out/
+
+### Ingore Files
+
+collitions_logs.txt
+[simulation_report].txt
