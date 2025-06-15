@@ -21,4 +21,17 @@ typedef struct {
     Position *matrix;
 } collition_thread_info;
 
+typedef struct {
+    int drone1;
+    int drone2;
+    int time_step;
+    Position pos;
+} CollisionEvent;
+
+typedef struct {
+    int drones;
+    int steps;
+    Position *matrix;
+} ThreadCfg;
+
 #endif
