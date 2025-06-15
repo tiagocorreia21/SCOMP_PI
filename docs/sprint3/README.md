@@ -77,9 +77,21 @@ so that any conflicts are identified and can be reported.
 
 ### Description
 
+- As a simulation engine i want to synchronize the simulation's step-by-step progression using
+semaphores, so that all drone processes and parent threads advance in lockstep
+through each simulation time step.
+
+
 ### Acceptance Criteria
 
+- Semaphores are used to control the progression of each
+simulation time step.
+
 ### Decisions
+
+- Two semaphores used
+- One main semaphore called main_semaphore, where the drone signals the main process that it's finished
+- One second semaphore called step_semaphores, where the main process authorize the drones to proceed. This semaphore beeing an array with the size of the number of drones.
 
 ---
 
