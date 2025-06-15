@@ -5,9 +5,7 @@
 #include <time.h>
 #include "structs.h"
 
-/* -------------------------------------------------------------
- * globals shared by both worker threads
- * ----------------------------------------------------------- */
+
 #define MAX_COLLISIONS 1024
 
 static CollisionEvent collisions[MAX_COLLISIONS];
@@ -15,14 +13,12 @@ static int            collision_cnt      = 0;
 
 static pthread_mutex_t mtx              = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t  cv_work_available = PTHREAD_COND_INITIALIZER;
-static int             work_left         = 1;   // 0 ⇒ simulation over
+static int             work_left         = 1;
 
-/* -------------------------------------------------------------
- * collision-detection thread
- * ----------------------------------------------------------- */
+// Thread for collision detection
 static void *collision_thread(void *arg) {
     ThreadCfg cfg = *((ThreadCfg *)arg);
-    free(arg);                         // cfg is now a local copy
+    free(arg);
 
     write(STDOUT_FILENO, "Collision Thread\n", 17);
 
@@ -49,7 +45,7 @@ static void *collision_thread(void *arg) {
         }
     }
 
-    /* no more work -> tell report thread it can finish */
+    // work_left 0, means no more work to do
     pthread_mutex_lock(&mtx);
     work_left = 0;
     pthread_cond_signal(&cv_work_available);
@@ -58,9 +54,7 @@ static void *collision_thread(void *arg) {
     return NULL;
 }
 
-/* -------------------------------------------------------------
- * report thread
- * ----------------------------------------------------------- */
+// Report generation code
 static int cfg_total_drones = 0;
 static int cfg_total_steps  = 0;
 
@@ -68,14 +62,14 @@ static void *report_thread(void *arg) {
     (void)arg;
     write(STDOUT_FILENO, "Report Thread\n", 14);
 
-    /* wait until collision_thread says there is nothing left to do */
+    // Wait until collision_thread says there is nothing left to do
     pthread_mutex_lock(&mtx);
     while (work_left || collision_cnt == 0) {
         if (!work_left) break;  // finished & no collisions – we can exit
         pthread_cond_wait(&cv_work_available, &mtx);
     }
 
-    /* build the final report ---------------------------------- */
+    // Build the final report
     time_t rawtime;
     struct tm *timeinfo;
     char timestamp[80];
@@ -112,15 +106,13 @@ static void *report_thread(void *arg) {
             collision_cnt ? "FAIL" : "PASS");
     fclose(report_file);
 
-    puts("Final report written to simulation_report.txt");
+    printf("Final report written to simulation_report_%s.txt\n", timestamp);
 
     pthread_mutex_unlock(&mtx);
     return NULL;
 }
 
-/* -------------------------------------------------------------
- * helper to start both threads (called from main)
- * ----------------------------------------------------------- */
+// Function to create the threads for collision detection and reporting
 void create_threads(pthread_t tid[2], int drones, int steps,
                     Position *matrix) {
     ThreadCfg *cfg = malloc(sizeof(ThreadCfg));

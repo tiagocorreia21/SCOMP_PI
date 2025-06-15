@@ -35,7 +35,7 @@ int main() {
 	for (int i = 0; i < DRONE_NUM; i++) {
 		char sem_name[64];
 		snprintf(sem_name, sizeof(sem_name), "/step_semaphore_%d", i);
-		sem_unlink(sem_name); // Remove caso já exista
+		sem_unlink(sem_name);
 		step_semaphores[i] = sem_open(sem_name, O_CREAT | O_EXCL, 0644, 0);
 		if (step_semaphores[i] == SEM_FAILED) {
 			perror("sem_open step_semaphore failed");
@@ -50,8 +50,6 @@ int main() {
 		exit(1);
 	}
     pthread_t thread_ids[THREAD_NUM];
-
-    //create_threads(thread_ids, DRONE_NUM, TIME_STEPS_NUM, matrix);
 
 	int p[DRONE_NUM]; //PIDs
 
@@ -70,7 +68,7 @@ int main() {
             for (int j = 0; j < TIME_STEPS_NUM; j++) {
 				sem_wait(step_semaphores[i]); 
 				
-				run_drone_script(j, matrix, i, DRONE_NUM); // <-- FIXED HERE
+				run_drone_script(j, matrix, i, DRONE_NUM);
 				
 				sem_post(main_semaphore);
             }
@@ -80,11 +78,11 @@ int main() {
 	
 	simulation(TIME_STEPS_NUM, DRONE_NUM);
 
-	//pthread_t thread_ids[THREAD_NUM];
 	create_threads(thread_ids, DRONE_NUM, TIME_STEPS_NUM, matrix);
 
 	simulation_finished();                       // let the reporter exit
-	for (int i = 0; i < 2; ++i) pthread_join(thread_ids[i], NULL);
+
+	for (int i = 0; i < 2; ++i) pthread_join(thread_ids[i], NULL); // Wait for the threads to finish
 
 	//=================================================================================================================
 
@@ -103,13 +101,7 @@ int main() {
        	}
     }
     printf("============================================\n\n");
-
-	// simulation_finished();
-
-	// for (int i = 0; i < THREAD_NUM; ++i)
-	// 	pthread_join(thread_ids[i], NULL);
-    
-    
+       
 	for (int i = 0; i < DRONE_NUM; i++) {
 		sem_close(step_semaphores[i]);
 		char sem_name[64];
@@ -118,8 +110,8 @@ int main() {
 	}
 	sem_close(main_semaphore);
 	sem_unlink("/main_semaphore");
-    
-    //wait for all threads to finish
+
+    // Wait for all threads to finish
     for (int i = 0; i < THREAD_NUM; i++) {
         pthread_join(thread_ids[i], NULL);
     }
