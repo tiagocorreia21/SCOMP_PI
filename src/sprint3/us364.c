@@ -13,17 +13,16 @@ extern sem_t* main_semaphore;
 void simulation(int time_steps, int num_drone) {
 
     for (int t = 0; t < time_steps; t++) {
+
         printf("\n=== SIMULATION TIME STEP %d ===\n", t);
 
         // Liberta todos os drones para executarem o timestep atual
         for (int d = 0; d < num_drone; d++) {
-			
             sem_post(step_semaphores[d]);  // Sinaliza para o drone avançar
         }
 
         // Espera que todos os drones terminem este timestep
         for (int d = 0; d < num_drone; d++) {
-			
             sem_wait(main_semaphore); 	// Drone sinaliza ao terminar
         }
     }
