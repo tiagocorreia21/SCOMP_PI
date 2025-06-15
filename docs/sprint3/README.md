@@ -1,5 +1,15 @@
 # SCOMP
-- If you need to change the number of timesteps and the number of max colitions,you should change the correspondent variables in main.c, structs.h, us364.c, and thread_functions.c files. 
+
+- If you need to change the number of time steps and the number of max collisions,you should change the correspondent 
+  variables in main.c and structs.h files. 
+
+## How to run the application
+
+1. Move to sprint3 directory inside the project.
+2. Type the command 'make' to compile the program.
+3. Type the command 'make run' to run the simulation.
+4. When the simulation is done, the report file will be generated to the same directory.
+
 ## US361
 
 ### Description
@@ -22,7 +32,8 @@ Initialize hybrid simulation Environment With Shared Memory
 - There are global variables on the main.c file to control the number of drones and time steps of the simulation;
 - A function for the allocation of the shared data (matrix) was implemented;
 - A function to deallocate the matrix was implemented;
-- A new process is created for each drone and each drone has a script that generates positions and writes it on the shared matrix;
+- A new process is created for each drone and each drone has a script that generates positions and writes it on the 
+  shared matrix;
 - Threads are created for collition scanning and report generation.
 
 ---
@@ -33,12 +44,14 @@ Initialize hybrid simulation Environment With Shared Memory
 
 Implement Function-Specific Threads in the Parent Process
 
-- As a simulation controller, I want the parent process to have at least two dedicated threads (one for collision detection, one for report generation);
+- As a simulation controller, I want the parent process to have at least two dedicated threads (one for collision 
+  detection, one for report generation);
 - So that each functionality operates concurrently and independently.
 
 ### Acceptance criteria
 
-- The parent process creates a collision detection thread responsible for scanning the shared memory for drone position conflicts;
+- The parent process creates a collision detection thread responsible for scanning the shared memory for drone position 
+  conflicts;
 - A report generation thread is created to compile simulation results and respond to collision events;
 - Any additional thread that you deem appropriate for any of the required functionalities;
 - Threads are managed using mutexes and condition variables for internal synchronization.
@@ -55,21 +68,22 @@ Implement Function-Specific Threads in the Parent Process
 ### Description
 - Detects and handles collisions between drones during the simulation.
 - As a simulation controller, I want the system to continuously monitor
-drone positions across all timesteps to detect spatial collisions, 
+drone positions across all time steps to detect spatial collisions, 
 so that any conflicts are identified and can be reported.
 
 ### Acceptance Criteria
 
-- The system must detect when two or more drones occupy the same positon at the same time.
+- The system must detect when two or more drones occupy the same position at the same time.
 - Upon detecting a collision, the system should log the event and notify the involved drones via signals.
 - Each drone must handle the received signal and notify the system user with a message.
 - When a drone receives a SIGUSR1 (collision detected), it should block other signals while handling it.
-- The system should allow early termination if collisions exceed a predefined threshold by sending termination signals to drones.
+- The system should allow early termination if collisions exceed a predefined threshold by sending termination 
+  signals to drones.
 
 ### Decisions
 
 - A separate thread was implemented for collision detection.
-- The thread iterates through the shared memory matrix and compares drone positions pairwise for each timestep;
+- The thread iterates through the shared memory matrix and compares drone positions pairwise for each time step;
 - When a collision is found, it sets a shared flag and signals a condition variable to wake the report thread;
 
 ---
@@ -91,7 +105,8 @@ simulation time step.
 
 - Two semaphores used
 - One main semaphore called main_semaphore, where the drone signals the main process that it's finished
-- One second semaphore called step_semaphores, where the main process authorize the drones to proceed. This semaphore beeing an array with the size of the number of drones.
+- One second semaphore called step_semaphores, where the main process authorize the drones to proceed. This semaphore 
+  being an array with the size of the number of drones.
 
 ---
 
@@ -101,7 +116,9 @@ simulation time step.
 
 Generates and stores the final simulation Report
 
-- As a system user, I want a comprehensive report that details the simulation outcomes — including drone execution statuses, collision events (with timestamps and positions), and overall validation results — So that I can assess the safety and performance of the figure post-simulation.
+- As a system user, I want a comprehensive report that details the simulation outcomes — including drone execution 
+  statuses, collision events (with timestamps and positions), and overall validation results 
+- So that I can assess the safety and performance of the figure post-simulation.
 
 ### Acceptance Criteria
 
@@ -112,8 +129,8 @@ Generates and stores the final simulation Report
 
 ### Decisions
 
-- The report generation thread is tasked with assembling and writting the final report upon simulation completion;
-- The report will be saved in a txt file with the name **"simulation_report_YYYY_MMM_dd_HH_mm_ss.txt"** for acessibility;
-- A status *"Pass/Faill"* will be printed at the end of the report for an at-a-glance result.
+- The report generation thread is tasked with assembling and writing the final report upon simulation completion;
+- The report will be saved in a txt file with the name **"simulation_report_YYYY_MMM_dd_HH_mm_ss.txt"** for accessibility;
+- A status *"Pass/Fail"* will be printed at the end of the report for an at-a-glance result.
 
 ---
