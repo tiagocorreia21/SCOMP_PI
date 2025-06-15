@@ -1,5 +1,5 @@
 # SCOMP
-
+- If you need to change the number of timesteps and the number of max colitions,you should change the correspondent variables in main.c, structs.h, us364.c, and thread_functions.c files. 
 ## US361
 
 ### Description
@@ -53,10 +53,24 @@ Implement Function-Specific Threads in the Parent Process
 ## US363 - Detect Drone Collitions
 
 ### Description
+- Detects and handles collisions between drones during the simulation.
+- As a simulation controller, I want the system to continuously monitor
+drone positions across all timesteps to detect spatial collisions, 
+so that any conflicts are identified and can be reported.
 
 ### Acceptance Criteria
 
+- The system must detect when two or more drones occupy the same positon at the same time.
+- Upon detecting a collision, the system should log the event and notify the involved drones via signals.
+- Each drone must handle the received signal and notify the system user with a message.
+- When a drone receives a SIGUSR1 (collision detected), it should block other signals while handling it.
+- The system should allow early termination if collisions exceed a predefined threshold by sending termination signals to drones.
+
 ### Decisions
+
+- A separate thread was implemented for collision detection.
+- The thread iterates through the shared memory matrix and compares drone positions pairwise for each timestep;
+- When a collision is found, it sets a shared flag and signals a condition variable to wake the report thread;
 
 ---
 ## US364 - Synchronize drone execution with a time step
